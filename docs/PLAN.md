@@ -67,7 +67,7 @@ Every flow ends in an explicit choice; nothing is sent without a final Send conf
 **6. Send**
 
 1. A preview shows recipient, channel or thread, and the final text.
-2. After Send, a 10-second countdown with Undo appears; the message is only sent when it ends. Slack messages can also be deleted afterwards; Gmail mail cannot be recalled once sent.
+2. After Send, a 5-second countdown with Undo appears; the message is only sent when it ends. Slack messages can also be deleted afterwards; Gmail mail cannot be recalled once sent.
 
 **7. New message from scratch**
 

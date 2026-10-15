@@ -8,7 +8,7 @@ One Claude Code plugin with separate features you switch on or off from one pane
 Code tab and the terminal:
 
 - **Inbox** — Slack, Gmail, Calendar, GitHub and Jira in one live, color-coded list behind a bell. Drafts
-  three replies on Haiku in its own session; you send with a 10 s Undo. Meeting cards before each meeting.
+  three replies on Haiku in its own session; you send with a 5 s Undo. Meeting cards before each meeting.
 - **Auto rules** — rules you make from the chat (`/sb-auto`). Ask first by default; nothing ever sends
   without a saved rule, a named person and a clear request.
 - **Files** — a live tree of what Claude reads, edits and commits.
@@ -34,7 +34,7 @@ Everything runs locally: no server, no cloud database; tokens live in your OS ke
 
 ## Install
 
-> **Beta (1.0.0-beta.1).** Needs Python 3.10+, Claude Code 2.1.295 or newer, and function hooks switched on:
+> **Beta (1.0.0-beta.2).** Needs Python 3.10+, Claude Code 2.1.295 or newer, and function hooks switched on:
 > add `"CLAUDE_CODE_ENABLE_FUNCTION_HOOKS": "1"` under `env` in `~/.claude/settings.json`.
 
 From the marketplace, inside Claude Code:
@@ -51,6 +51,11 @@ Or download the [latest release](https://github.com/hassamali898/switchboard/rel
 ```
 
 Then start a new Claude Code session (the desktop Code tab or `claude` in a terminal) and type `/sb-inbox`. Everything else happens in the inbox, with buttons.
+
+**Connector permission.** Switchboard reads Gmail, Slack and Jira through Claude's connectors, and those calls follow
+your Claude Code permission rules. If a source says **Needs your OK**, press **Allow**: it puts the exact read-only
+tools in your prompt, and Claude adds them to `permissions.allow` after you confirm. Tools that send are never added
+for you. **Stuck?** Switchboard runs inside Claude Code, so ask Claude what you see; it can read the plugin's state.
 
 The installer:
 

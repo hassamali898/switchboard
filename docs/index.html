@@ -102,6 +102,22 @@ footer .wrap{display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between}
 .step .code{grid-row:1/3;grid-column:2;margin:0}
 .code{position:relative;margin-top:12px}
 .code pre{margin:0;padding:12px 64px 12px 14px;white-space:pre-wrap;overflow-wrap:anywhere}
+.cmds{margin-top:16px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+.cmds summary{display:flex;align-items:center;gap:8px;padding:12px 22px;cursor:pointer;font-weight:600;font-size:14px;list-style:none;user-select:none}
+.cmds summary::-webkit-details-marker{display:none}
+.cmds summary:hover{color:var(--clay)}
+.cmds .n{font-size:12px;font-weight:600;color:var(--muted);background:var(--bg2);border:1px solid var(--line);border-radius:999px;padding:0 8px}
+.cmds .chev{width:18px;height:18px;margin-left:auto;transition:transform .2s;color:var(--muted)}
+.cmds[open] .chev{transform:rotate(180deg)}
+.cmdlist{list-style:none;margin:0;padding:8px 22px 16px;display:grid;gap:4px;border-top:1px solid var(--line)}
+.cmdlist li{display:grid;gap:5px;margin:0;padding:10px 6px}
+.cmdlist li+li{border-top:1px dashed var(--line)}
+.cmdlist li::before{display:none}
+.cmdlist code{font-size:12.5px;white-space:normal;overflow-wrap:anywhere;justify-self:start;background:var(--bg2);border:1px solid var(--line);border-radius:7px;padding:2px 8px;color:var(--ink)}
+.cmdlist span{color:var(--muted);font-size:13.5px;line-height:1.45}
+.askhelp{display:flex;gap:14px;align-items:flex-start;margin-top:28px;padding:18px 20px;border-radius:16px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);font-size:15px}
+.askhelp b{display:block;margin-bottom:2px}.askhelp div{color:var(--muted)}.askhelp b{color:var(--ink)}
+.askicon{flex:none;display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--claySoft);color:var(--clay);font-weight:700}
 .copy{position:absolute;top:8px;right:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:600 12px Inter,sans-serif;padding:4px 9px;border-radius:7px;cursor:pointer}
 .copy:hover{border-color:var(--clay);color:var(--clay)}
 .copy.done{background:var(--tealSoft);color:var(--teal);border-color:transparent}
@@ -118,11 +134,11 @@ footer .wrap{display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between}
 </div></nav>
 
 <header class="hero"><div class="wrap">
-  <span class="pill"><span class="dot"></span>Public beta · v1.0.0-beta.1</span>
+  <span class="pill"><span class="dot"></span>Public beta · v1.0.0-beta.2</span>
   <h1 class="serif">Switch less. <em>Build more.</em></h1>
   <p class="lede">One Claude Code plugin that keeps Slack, Gmail, Calendar, GitHub and Jira in one quiet inbox, and adds the safety and visibility tools you wish Claude Code had: holds for risky commands, a live file tree, replay, agents and more.</p>
   <div class="ctas">
-    <a class="btn primary" href="https://github.com/hassamali898/switchboard/releases/download/v1.0.0-beta.1/switchboard-1.0.0-beta.1.zip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 21h16"/></svg>Download the beta</a>
+    <a class="btn primary" href="https://github.com/hassamali898/switchboard/releases/download/v1.0.0-beta.2/switchboard-1.0.0-beta.2.zip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 21h16"/></svg>Download the beta</a>
     <a class="btn ghost" href="https://github.com/hassamali898/switchboard"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a11.5 11.5 0 00-3.6 22.4c.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2a11 11 0 015.8 0c2.2-1.5 3.2-1.2 3.2-1.2.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A11.5 11.5 0 0012 .5z"/></svg>View on GitHub</a>
   </div>
   <p class="meta">Free and open source (MIT) · Claude desktop app · Terminal support coming next · runs entirely on your machine</p>
@@ -132,7 +148,7 @@ footer .wrap{display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between}
 <section id="features"><div class="wrap">
   <div class="eyebrow">Features</div>
   <h2 class="serif">Eight tools. One switch each.</h2>
-  <p class="sub">Every feature is separate. Turn each on or off from one pane with <code>/sb</code>. Coding sessions stay quiet: only what truly needs you shows up.</p>
+  <p class="sub">Every feature is separate. Turn each on or off from one pane with <code>/switchboard</code>. Coding sessions stay quiet: only what truly needs you shows up.</p>
   <div class="features">
     <article class="feature">
       <div class="shot"><img src="img/inbox.jpg?v=2" alt="The Inbox session in the Claude desktop app" loading="lazy"></div>
@@ -140,7 +156,8 @@ footer .wrap{display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between}
         <div class="fhead"><span class="icon c4">01</span><span class="fname">Inbox</span><code class="cmd">/sb-inbox</code></div>
         <h3 class="serif">Every message that matters, in one quiet list.</h3>
         <p>Slack, Gmail, Calendar, GitHub and Jira land in one color-coded list behind a bell. Coding sessions stay quiet: only what truly needs you shows above the prompt.</p>
-        <ul><li>Three drafted replies (short, detailed, a question) on Haiku</li><li>Send with a 10 s Undo; never twice, never to the wrong person</li><li>Meeting cards 5 min, 1 min and at the start, with Join</li></ul>
+        <ul><li>Three drafted replies (short, detailed, a question) on Haiku</li><li>Send with a 5 s Undo; never twice, never to the wrong person</li><li>Meeting cards 5 min, 1 min and at the start, with Join</li></ul>
+        <details class="cmds"><summary>All commands <span class="n">5</span><svg class="chev" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 7.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><ul class="cmdlist"><li><code>/sb-inbox</code><span>Open the Inbox in the side pane.</span></li><li><code>/sb-inbox here</code><span>Make this session your Inbox session: drafts, sends and Auto run here.</span></li><li><code>/sb-inbox sources</code><span>See each source’s status, and connect or fix one.</span></li><li><code>/sb-inbox demo on | off</code><span>Try it with made-up messages; nothing is sent.</span></li><li><code>/sb-inbox restart</code><span>Start checking your sources again.</span></li></ul></details>
       </div>
     </article>
     <article class="feature flip">
@@ -150,6 +167,7 @@ footer .wrap{display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between}
         <h3 class="serif">Rules in plain words. You stay in charge.</h3>
         <p>Tell the chat what to handle — "reply to Sara when she asks about the roadmap" — and Switchboard turns it into a rule you can read and switch.</p>
         <ul><li>Ask first by default: you check each action before it goes</li><li>Acts alone only for a person you named, under a daily cap</li><li>Every action is logged, most with Undo</li></ul>
+        <details class="cmds"><summary>All commands <span class="n">6</span><svg class="chev" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 7.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><ul class="cmdlist"><li><code>/sb-auto Sara: if she asks about the roadmap, reply</code><span>Make a rule in plain words; it starts in Ask first.</span></li><li><code>/sb-auto rules</code><span>Open the Auto pane: your rules, waiting checks and recent actions.</span></li><li><code>/sb-auto delete 1</code><span>Delete a rule by its number in the list (or by name).</span></li><li><code>/sb-auto on | off</code><span>Turn Auto on, or off so rules wait and nothing is matched.</span></li><li><code>/sb-pause 1h</code><span>Pause every rule and running task for a while; no time pauses until you resume.</span></li><li><code>/sb-auto resume</code><span>Start Auto again after a pause.</span></li></ul></details>
       </div>
     </article>
     <article class="feature">
@@ -159,6 +177,7 @@ footer .wrap{display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between}
         <h3 class="serif">See what Claude reads, edits and commits.</h3>
         <p>A live file tree opens by itself while Claude works, highlights each file it touches, and closes when the turn ends.</p>
         <ul><li>Reading, edited and new files marked as they happen</li><li>Commits, pushes and PRs in the footer</li><li>Find a file, sizes, and subagent edits</li></ul>
+        <details class="cmds"><summary>All commands <span class="n">3</span><svg class="chev" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 7.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><ul class="cmdlist"><li><code>/sb-files</code><span>Open the live file tree of this project.</span></li><li><code>/sb-files src/app</code><span>Open the tree at a folder.</span></li><li><code>/sb-files auto on | off</code><span>Open by itself while Claude works, or only when you ask.</span></li></ul></details>
       </div>
     </article>
     <article class="feature flip">
@@ -168,6 +187,7 @@ footer .wrap{display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between}
         <h3 class="serif">Every edit, step by step.</h3>
         <p>Walk through the last turns one edit at a time, with the changed words marked — and see what you changed yourself.</p>
         <ul><li>The last 3 turns, kept across sessions</li><li>Word-level diffs, git diffs, notebook cells</li><li>Previous / Next with the keyboard</li></ul>
+        <details class="cmds"><summary>All commands <span class="n">2</span><svg class="chev" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 7.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><ul class="cmdlist"><li><code>/sb-replay</code><span>Step through the last turn’s edits, one at a time.</span></li><li><code>/sb-replay 2</code><span>Replay an earlier turn (the last 3 are kept).</span></li></ul></details>
       </div>
     </article>
     <article class="feature">
@@ -177,6 +197,7 @@ footer .wrap{display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between}
         <h3 class="serif">Look before it deletes.</h3>
         <p>Commands like rm -rf, git reset --hard or git clean are held and measured first, so you see exactly what they would remove.</p>
         <ul><li>Files, sizes and what git can't restore</li><li>Run or Cancel; runs by itself after 1 min unless you choose</li><li>Never two holds at once; fails safe on any error</li></ul>
+        <details class="cmds"><summary>All commands <span class="n">5</span><svg class="chev" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 7.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><ul class="cmdlist"><li><code>/sb-blast</code><span>The held command, if any, and recent history.</span></li><li><code>/sb-blast wait 1m</code><span>How long a held command waits before it runs by itself.</span></li><li><code>/sb-blast wait none</code><span>Held commands wait until you choose Run or Cancel.</span></li><li><code>/sb-blast off 1h</code><span>Stop holding commands for a while.</span></li><li><code>/sb-blast on</code><span>Hold risky commands again.</span></li></ul></details>
       </div>
     </article>
     <article class="feature flip">
@@ -186,6 +207,7 @@ footer .wrap{display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between}
         <h3 class="serif">Every subagent, live.</h3>
         <p>When Claude starts subagents, a pane shows each one's steps, model, tokens, time and cost — and closes when they finish.</p>
         <ul><li>Progress per agent and for the whole run</li><li>Cost and context use as they go</li><li>Display only: no extra model calls</li></ul>
+        <details class="cmds"><summary>All commands <span class="n">1</span><svg class="chev" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 7.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><ul class="cmdlist"><li><code>/sb-agents</code><span>Open the live view of running subagents: steps, model, tokens, time and cost.</span></li></ul></details>
       </div>
     </article>
     <article class="feature">
@@ -195,6 +217,7 @@ footer .wrap{display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between}
         <h3 class="serif">Correct Claude once.</h3>
         <p>When you correct Claude ("use pnpm, not npm"), Reflect offers to save it as a rule in CLAUDE.md — locally, without a model call.</p>
         <ul><li>For this project or all your projects</li><li>Reword it before saving, or decline for good</li><li>Saved rules apply from your next message</li></ul>
+        <details class="cmds"><summary>All commands <span class="n">3</span><svg class="chev" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 7.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><ul class="cmdlist"><li><code>/sb-reflect</code><span>Rules waiting for your review.</span></li><li><code>/sb-reflect pause | resume</code><span>Stop or restart listening for your corrections.</span></li><li><code>remember: use pnpm</code><span>Say it in a message to suggest a rule yourself.</span></li></ul></details>
       </div>
     </article>
     <article class="feature flip">
@@ -204,9 +227,11 @@ footer .wrap{display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between}
         <h3 class="serif">No surprise re-writes.</h3>
         <p>After a break the prompt cache goes cold, and your next message re-writes it at full price. Cache Tax holds that message and shows the cost first.</p>
         <ul><li>Send now, or start fresh with a short recap</li><li>The real price for your model and context</li><li>Keep-warm only when you ask for it</li></ul>
+        <details class="cmds"><summary>All commands <span class="n">3</span><svg class="chev" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 7.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><ul class="cmdlist"><li><code>/sb-cache</code><span>Cache status, and what your next message would cost.</span></li><li><code>/sb-cache warm 6h | always | off</code><span>Keep the cache warm for a while, always, or not at all.</span></li><li><code>/sb-cache guard hold | warn</code><span>Hold a costly message for your choice, or just warn.</span></li></ul></details>
       </div>
     </article>
   </div>
+  <div class="askhelp"><span class="askicon">?</span><div><b>Stuck on something?</b> Switchboard runs inside Claude Code, so just ask Claude. Say what you see, like “the Gmail row says Needs your OK” or “my Auto rule didn’t reply”, and Claude can read the plugin’s state and tell you what’s wrong and how to fix it.</div></div>
 </div></section>
 
 <section id="install" class="alt"><div class="wrap">
@@ -255,7 +280,7 @@ footer .wrap{display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between}
     <span class="pill"><span class="dot"></span>Beta</span>
     <h2 class="serif">Try Switchboard today.</h2>
     <p class="sub" style="margin:0 auto 26px">It's a beta: expect rough edges, and tell us what you find.</p>
-    <div class="ctas"><a class="btn primary" href="https://github.com/hassamali898/switchboard/releases/download/v1.0.0-beta.1/switchboard-1.0.0-beta.1.zip">Download v1.0.0-beta.1</a><a class="btn ghost" href="https://github.com/hassamali898/switchboard/issues">Report an issue</a></div>
+    <div class="ctas"><a class="btn primary" href="https://github.com/hassamali898/switchboard/releases/download/v1.0.0-beta.2/switchboard-1.0.0-beta.2.zip">Download v1.0.0-beta.2</a><a class="btn ghost" href="https://github.com/hassamali898/switchboard/issues">Report an issue</a></div>
   </div>
 </div></section>
 

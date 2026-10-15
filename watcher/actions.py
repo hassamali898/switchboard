@@ -416,10 +416,13 @@ def me_for(item: Item, clients: Clients) -> str:
 
 
 def connector_send_plan(queue: Queue, ref: str | int, text: str, idempotency_key: str,
-                        confirm_target: str, reply_all: bool = False) -> dict[str, Any]:
+                        confirm_target: str, reply_all: bool = False, rule: str = "",
+                        cap: Optional[int] = None) -> dict[str, Any]:
     """Every guard that doesn't need the network: then the plugin re-checks the email still
-    exists and calls the connector's reply, and reports back with connector_send_done/failed."""
+    exists and calls the connector's reply, and reports back with connector_send_done/failed.
+    `rule` and `cap`: an auto rule's reply, held to the same checks as the direct path."""
     item = require_item(queue, ref)
+    check_rule(queue, item, rule, cap)
     if item.via != "connector" or item.source not in ("gmail", "slack"):
         raise SendBlocked("not_connector", "Only Gmail and Slack messages from Claude's connectors are sent this way.")
     text = text.strip()
@@ -432,7 +435,7 @@ def connector_send_plan(queue: Queue, ref: str | int, text: str, idempotency_key
     if confirm_target != target:
         raise SendBlocked("wrong_recipient", "The recipient changed since the preview. Check it and send again.",
                           target=target)
-    _claim(queue, idempotency_key, item.id)
+    _claim(queue, idempotency_key, item.id, rule=rule, cap=cap)
     if item.source == "slack":
         return {"ok": True, "plan": {"channel": item.meta.get("channel"), "ts": item.meta.get("ts"),
                                      "thread_ts": slack_thread_ts(item), "text": text, "target": target}}
@@ -441,13 +444,13 @@ def connector_send_plan(queue: Queue, ref: str | int, text: str, idempotency_key
 
 
 def connector_send_done(queue: Queue, ref: str | int, idempotency_key: str, result: Any,
-                        reply_all: bool = False) -> dict[str, Any]:
+                        reply_all: bool = False, rule: str = "") -> dict[str, Any]:
     item = require_item(queue, ref)
     queue.finish_send(idempotency_key, "sent", result)
     undo = {"type": "none", "reason": "Sent mail cannot be recalled." if item.source == "gmail"
             else "Delete it in Slack: Claude's Slack connector can't delete messages."}
     action_id = queue.log_action("send_reply", source=item.source, target=describe_target(item, reply_all, me_for(item, Clients())),
-                                 item_id=item.id, detail={"via": "connector", "result": result}, undo=undo)
+                                 item_id=item.id, rule=rule, detail={"via": "connector", "result": result}, undo=undo)
     queue.mark_read([item.id])
     queue.delete_draft(item.id)
     return {"ok": True, "action_id": action_id, "undo": undo}

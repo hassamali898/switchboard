@@ -9,7 +9,7 @@ export type { InboxItem, InboxLevel, InboxReply, InboxSourceId, InboxSourceState
 
 export const MAX_ITEMS = 300
 /** Send waits this long for Undo. */
-export const UNDO_MS = 10_000
+export const UNDO_MS = 5_000
 /** "Remind me in 1 hour". */
 export const REMIND_MS = 3_600_000
 export const SOURCES: readonly InboxSourceId[] = ['slack', 'gmail', 'calendar', 'github', 'jira']
@@ -257,4 +257,29 @@ export function replyKey(id: string, text: string): string {
   let hash = 0x811c9dc5
   for (let i = 0; i < text.length; i++) hash = Math.imul(hash ^ text.charCodeAt(i), 0x01000193) >>> 0
   return `${id}:${text.length}:${hash.toString(16)}`
+}
+
+// ---- Connector permission ----------------------------------------------------------------------------
+// A plugin's connector call goes through the person's permission rules, and nobody can answer "ask" for it
+// (auto mode's classifier gives it no verdict either), so a tool the rules don't allow is refused. The
+// person allows the read-only tools once; Switchboard never asks for one that sends.
+
+/** Each source's other read-only tools, beside the search that was refused. */
+const READ_TOOLS: Record<string, readonly string[]> = {
+  gmail: ['search_threads', 'get_thread'], slack: ['slack_read_thread'], jira: ['getAccessibleAtlassianResources'],
+}
+const WRITES = /create|update|delete|remove|add|edit|post|send|reply|forward|transition|merge|close|move|write|set|cancel|respond|trash|label|draft/i
+
+/** `$.mcp.call(server, tool) refused: …` → the read-only rules to allow for that source; null for any other error. */
+export function refusedRules(source: string, message: string): string[] | null {
+  const match = /\$\.mcp\.call\(([\w.-]+), (\w+)\) refused:/.exec(message)
+  if (!match) return null
+  const [, server = '', tool = ''] = match
+  const rules = [...new Set([tool, ...(READ_TOOLS[source] ?? [])])].filter(name => !WRITES.test(name)).map(name => `mcp__${server}__${name}`)
+  return rules.length ? rules : null
+}
+
+/** What Allow puts in the prompt: the person sends it, and Claude asks before it changes their settings. */
+export function allowRequest(name: string, rules: readonly string[]): string {
+  return `Let Switchboard read my ${name}: add these read-only connector tools to "permissions.allow" in ~/.claude/settings.json (nothing that sends): ${rules.join(', ')}`
 }

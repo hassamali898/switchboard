@@ -72,6 +72,15 @@ class Item:
         return cls(sender=sender, thread=Thread(**_known(Thread, thread)) if thread else None, **_known(cls, data))
 
 
+# A note you send yourself with this word in it shows in the Inbox, so the plugin can be tried live
+# without messaging anyone else. Everything else you sent stays out.
+SELF_TEST_TAG = "sbtest"
+
+
+def is_self_test(text: str) -> bool:
+    return SELF_TEST_TAG in (text or "").lower()
+
+
 PUBLIC_META = ("starts_at", "ends_at", "join_url", "attendees", "status", "priority", "assignee", "repo", "reason",
                "channel_name", "subject", "demo")
 

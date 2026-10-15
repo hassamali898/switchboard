@@ -4,7 +4,7 @@
 import { describe, expect, test } from 'claude-code/testing'
 import { conversationText, draftsRequest, parseDrafts, threadOf } from '../../hooks/features/inbox/drafts.ts'
 import {
-  REMIND_MS, bellCount, dismiss, eventOf, filters, initialInbox, itemOf, lists, matches, needsCard, needsYou, onEvent, remindLater,
+  REMIND_MS, allowRequest, bellCount, dismiss, eventOf, refusedRules, filters, initialInbox, itemOf, lists, matches, needsCard, needsYou, onEvent, remindLater,
   replyKey, replyText, startReply, statusLine, withItems, withReply, type InboxItem,
 } from '../../hooks/features/inbox/model.ts'
 import { needsButtonsSvg, needsCardSvg, statusSvg } from '../../hooks/features/inbox/pictures.ts'
@@ -141,3 +141,19 @@ describe('sending once', () => {
   })
 })
 
+
+describe('connector permission', () => {
+  const refused = (server: string, tool: string) => `switchboard: $.mcp.call(${server}, ${tool}) refused: The server-side auto mode classifier gave no verdict`
+  test('a refused read asks for that source\'s read-only tools', () => {
+    expect(refusedRules('gmail', refused('c34a-b6', 'search_threads'))).toEqual(['mcp__c34a-b6__search_threads', 'mcp__c34a-b6__get_thread'])
+    expect(refusedRules('slack', refused('db85', 'slack_search_public_and_private')))
+      .toEqual(['mcp__db85__slack_search_public_and_private', 'mcp__db85__slack_read_thread'])
+    expect(refusedRules('calendar', refused('claude_ai_Calendar', 'list_events'))).toEqual(['mcp__claude_ai_Calendar__list_events'])
+  })
+  test('never a tool that sends, and nothing for other errors', () => {
+    expect(refusedRules('slack', refused('db85', 'slack_send_message'))).toEqual(['mcp__db85__slack_read_thread'])
+    expect(refusedRules('github', refused('gh', 'create_issue'))).toBe(null)
+    expect(refusedRules('gmail', 'Gmail refused the search.')).toBe(null)
+    expect(allowRequest('Gmail', ['mcp__a__search_threads'])).toContain('mcp__a__search_threads')
+  })
+})

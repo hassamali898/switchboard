@@ -4,7 +4,7 @@
 import { SANS, SERIF, SVG_STYLE, c, esc, eyebrow, fit, icon, textWidth, type TokenName } from '../../ui/theme.ts'
 import { panel, pill, pillWidth, type Part, type PillTone } from '../../ui/kit.ts'
 import {
-  checksOf, clock, doneToday, onlyIf, rightNowText, ruleSummary, sourcesText, taskText, waitingFor, whatGoes, UNDOABLE,
+  checksOf, clock, doneToday, onlyIf, rightNowText, ruleSummary, sourcesText, taskText, waitingFor, whatGoes, whoText, UNDOABLE,
   type AutoDo, type AutoDraft, type AutoLogEntry, type AutoRule, type AutoState, type AutoTask, type Check,
 } from './model.ts'
 import type { InboxItem } from '../inbox/model.ts'
@@ -144,14 +144,14 @@ export function ruleCardSvg(width: number, draft: AutoDraft, hover: string): { s
     const height = y + pad
     return { svg: bandPicture(width, height, frame(width, height) + body), height, parts }
   }
-  // Who, and the switch.
+  // Who, and the switch; under the name, the address it acts on (and where it was found) and the sources.
   if (rule.person) body += avatar(pad, y, 38, rule.person)
   else body += tile(pad, y, 38, 'bolt', 'orange', 'orangeSoft')
   const isSaved = draft.phase === 'saved'
   const toggle = modeSwitch(width - pad, y + 2, rule.mode, hover, 'auto:rule:mode')
   const nameW = inner - 50 - (width - pad - toggle.parts[0]!.leftPx) - 10
   body += `<text x="${pad + 50}" y="${y + 17}" ${SERIF} font-size="19" font-weight="500" style="fill:${c('ink')}">${esc(fit(rule.name, nameW, 19))}</text>` +
-    `<text x="${pad + 50}" y="${y + 35}" ${SANS} font-size="13.5" style="fill:${c('muted')}">${esc(fit(sourcesText(rule), nameW, 13.5))}</text>` + toggle.body
+    `<text x="${pad + 50}" y="${y + 35}" ${SANS} font-size="13.5" style="fill:${c('muted')}">${esc(fit(`${whoText(rule)} · ${sourcesText(rule)}`, nameW, 13.5))}</text>` + toggle.body
   parts.push(...toggle.parts)
   y += 46
   // When → Do.
@@ -403,7 +403,7 @@ export function rulesSvg(width: number, rules: readonly AutoRule[], hover: strin
     const textW = width - pad * 2 - 40 - pw - 12
     const name = fit(rule.name, textW * 0.55, 14.5, true)
     body += `<text x="${pad + 40}" y="${top + 28}" ${SANS} font-size="14.5" xml:space="preserve"><tspan font-weight="700" style="fill:${c('ink')}">${esc(name)}</tspan>` +
-      `<tspan font-size="13" style="fill:${c('muted')}">  · ${esc(fit(ruleSummary(rule), textW - textWidth(name, 14.5, true) - 16, 13))}</tspan></text>` +
+      `<tspan font-size="13" style="fill:${c('muted')}">  · ${esc(fit([rule.email, ruleSummary(rule)].filter(Boolean).join(' · '), textW - textWidth(name, 14.5, true) - 16, 13))}</tspan></text>` +
       (hover === key ? `<rect x="${width - pad - pw - 2}" y="${top + 9}" width="${pw + 4}" height="28" rx="14" style="fill:${c('line')}"/>` : '') +
       pill(width - pad, top + 23, label, tone, 12.5)
   })

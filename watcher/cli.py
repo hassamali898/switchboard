@@ -30,7 +30,7 @@ The Inbox session as orchestrator (other windows make no model calls):
 Gmail through Claude's connector (the plugin makes the connector calls):
     ingest      {"source": "gmail", "threads": [...]}  -> {"items": [...], "me": "…"}
     lease       {"name": "poll:gmail", "owner": "…", "ttl": 90, "force": false} -> {"granted": true}
-    send_plan   {"ref", "text", "idempotency_key", "confirm_target", "reply_all"} -> {"plan": {...}}
+    send_plan   {"ref", "text", "idempotency_key", "confirm_target", "reply_all", "rule"?, "cap"?} -> {"plan": {...}}
     send_done   {"ref", "idempotency_key", "result", "reply_all"} -> {"ok": true, "action_id"}
     send_failed {"idempotency_key", "code", "error"}   -> {"ok": true}
 
@@ -132,10 +132,11 @@ def run(command: str, request: dict[str, Any], queue: Queue, clients: actions.Cl
     if command == "send_plan":
         return actions.connector_send_plan(
             queue, request["ref"], request["text"], str(request["idempotency_key"]),
-            str(request.get("confirm_target", "")), bool(request.get("reply_all")))
+            str(request.get("confirm_target", "")), bool(request.get("reply_all")), str(request.get("rule", "")),
+            int(request["cap"]) if isinstance(request.get("cap"), int) else None)
     if command == "send_done":
         return actions.connector_send_done(queue, request["ref"], str(request["idempotency_key"]),
-                                           request.get("result"), bool(request.get("reply_all")))
+                                           request.get("result"), bool(request.get("reply_all")), str(request.get("rule", "")))
     if command == "send_failed":
         return actions.connector_send_failed(queue, str(request["idempotency_key"]),
                                              str(request.get("code", "error")), str(request.get("error", "")))

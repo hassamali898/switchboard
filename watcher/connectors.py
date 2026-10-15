@@ -12,7 +12,7 @@ import re
 from datetime import datetime, timezone
 from typing import Any, Optional
 
-from .items import Item, Person, Thread
+from .items import Item, Person, Thread, is_self_test
 
 
 def field(obj: Any, *names: str, default: Any = None) -> Any:
@@ -209,7 +209,7 @@ def slack_item(record: dict[str, str], me_id: str, kind: str) -> Optional[Item]:
     if "[BOT]" in sender:
         return None
     sender_id = (re.search(r"\(ID: (U\w+)\)", sender) or [None, ""])[1]
-    if me_id and sender_id == me_id:
+    if me_id and sender_id == me_id and not is_self_test(record.get("text", "")):
         return None
     name = re.sub(r"\s*<[^>]*>|\s*\(ID:[^)]*\)|\s*\[BOT\]", "", sender).strip() or "Someone"
     channel = record.get("channel", "")

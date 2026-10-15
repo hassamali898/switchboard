@@ -39,6 +39,7 @@ tests/hooks/              claude plugin test: pure rules and UI on terminal + de
 - **Don't add to the system prompt mid-conversation** (`prompt.compose` sections): it changes the cached prefix and the next turn re-writes the whole cache. Reflect hands a saved rule to Claude once, as `additionalContext` on `classic.UserPromptSubmit`; CLAUDE.md has it after.
 - **`ui.message` keys and presses carry where they came from:** `e.component` (`Pane` or `AbovePrompt`) and `e.element` (the Client's key, `<picture>:hits`). A band picture keeps the keyboard after a click, so Blast and Replay act on a key only when it came from their own pane pictures, and presses are looked up by component.
 - **Settings are saved through `savePrefs`**, which reads the store first: another window may have changed them since this one started.
+- **`$.mcp.call` goes through the person's permission rules** (seen live on desktop 2.1.295, 2026-10-16). Nobody can answer "ask" for a plugin's call, and auto mode's classifier gives it no verdict, so a connector tool the rules don't allow is refused (`$.mcp.call(server, tool) refused: …`). A plugin's own `tool.check` hook is not consulted, and a plugin must not grant itself permissions. The source row then says "Needs your OK" with **Allow**, which fills the prompt with the read-only tools to add to `permissions.allow` (`refusedRules`, never a tool that sends).
 
 ## Drawing on the desktop
 
@@ -75,6 +76,8 @@ tests/hooks/              claude plugin test: pure rules and UI on terminal + de
 - `$.command.run` in a test takes the full input (`args`, `origin`, `presentation`).
 
 ## Trying it live
+
+An installed plugin runs from a copy made at install time (`~/.claude/plugins/cache/…`), not from this folder: after a change, `claude plugin uninstall switchboard@switchboard && claude plugin install switchboard@switchboard`, then start a new session. With a `.sb-dev` file in the plugin folder, each session writes `.sb-dev-log-<session>.json` there.
 
 The plugin folder is linked into this session's mods folder (`~/.claude/dev-mods/<session>/switchboard`), so a session that enables hot reloading loads it and reloads it on every edit. A hot-loaded mod gets `.claude-plugin/types/` written beside it; that folder is git-ignored.
 

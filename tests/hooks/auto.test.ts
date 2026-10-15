@@ -4,7 +4,7 @@
 import { describe, expect, test } from 'claude-code/testing'
 import { outcomeOf, parseRule, reviewPrompt, ruleRequest, toolsFor } from '../../hooks/features/auto/making.ts'
 import {
-  ASK_LABELS, actsAlone, addTask, blockedBy, candidates, checksOf, classifyText, countUse, initialAuto, interrupt, isBot, newTask, pauseAll, repoMatches,
+  ASK_LABELS, actsAlone, addTask, blockedBy, emailFor, isPerson, isRulePerson, whoText, candidates, checksOf, classifyText, countUse, initialAuto, interrupt, isBot, newTask, pauseAll, repoMatches,
   restore, rollDay, saveRule, stored, usedToday, verdictOf, type AutoRule,
 } from '../../hooks/features/auto/model.ts'
 import { autoRowSvg, checkCardSvg, logSvg, rightNowSvg, ruleCardSvg, rulesSvg, tasksSvg } from '../../hooks/features/auto/pictures.ts'
@@ -30,6 +30,11 @@ describe('making a rule', () => {
     // A model asking for "auto", or pairing a question with archive, doesn't get it.
     const sneaky = parseRule('{"name": "x", "mode": "auto", "pairs": [{"when": "question", "do": "archive"}], "cap": 900}', 'r2', NOW)!
     expect([sneaky.mode, sneaky.pairs[0]!.do, sneaky.cap]).toEqual(['ask', 'reply', 50])
+    // "When I'm asked for a review, reply yes": a reply, and the card says so; a refused action shows what runs.
+    const yes = parseRule('{"name": "x", "pairs": [{"when": "pr_review", "do": "reply", "doText": "Reply with a short yes"}]}', 'r5', NOW)!
+    expect([yes.pairs[0]!.do, yes.pairs[0]!.doText]).toEqual(['reply', 'Reply with a short yes'])
+    const odd = parseRule('{"name": "x", "pairs": [{"when": "fyi", "do": "reply", "doText": "Reply to everyone"}]}', 'r6', NOW)!
+    expect([odd.pairs[0]!.do, odd.pairs[0]!.doText === 'Reply to everyone']).toEqual(['archive', false])
     expect(parseRule('no json', 'r3', NOW)).toBeNull()
     expect(parseRule('{"pairs": [{"when": "delete everything"}]}', 'r4', NOW)).toBeNull()
     expect(ruleRequest('Ahmed: if he asks').model).toBe('haiku')
@@ -130,5 +135,35 @@ describe('pictures', () => {
     expect(tasksSvg(560, [task], NOW, '').parts[0]!.key).toBe('auto:check:t1')
     expect(rulesSvg(560, state.rules, '').svg).toContain('Ask first')
     expect(logSvg(560, [{ at: NOW, text: 'Replied to Ahmed', actionId: '7', undo: 'slack_delete', isUndone: false }], '').parts[0]!.key).toBe('auto:undo:7')
+  })
+})
+
+describe('who a rule is about', () => {
+  test('a name matches an address-only sender (Gmail connector), never a sender named otherwise', () => {
+    const bare = { name: 'sara.khan@example.com', email: 'sara.khan@example.com', handle: 'sara.khan@example.com' }
+    expect(isPerson('Sara Khan', bare)).toBe(true)
+    expect(isPerson('sara.khan@example.com', bare)).toBe(true)
+    expect(isPerson('Ahmed Raza', bare)).toBe(false)
+    expect(isPerson('Sara Khan', { name: 'Someone Else', email: 'sara.khan@example.com', handle: '' })).toBe(false)
+    expect(isPerson('Sara Khan', { name: 'Sara Khan', email: '', handle: 'U1' })).toBe(true)
+  })
+})
+
+describe('a rule names its person by address', () => {
+  const from = (name: string, email: string) => ({ ...item('e'), from: { name, email, handle: email } })
+  test('a name gets the address the Inbox has seen, and the card says where it came from', () => {
+    const items = [from('Someone', 'someone@example.com'), from('sara.khan@example.com', 'sara.khan@example.com')]
+    expect(emailFor('Sara Khan', items)).toBe('sara.khan@example.com')
+    expect(emailFor('Nobody Here', items)).toBe('')
+    expect(emailFor('Typed@Example.com', [])).toBe('typed@example.com')
+    expect(whoText({ person: 'Sara Khan', email: 'sara.khan@example.com', isEmailFound: true })).toBe('sara.khan@example.com (found in your Inbox)')
+    expect(whoText({ person: 'Nobody Here', email: '', isEmailFound: false })).toContain('No email found')
+    expect(whoText({ person: '', email: '', isEmailFound: false })).toBe('Anyone')
+  })
+  test('with an address, Gmail must come from exactly it; Slack (no address) goes by name', () => {
+    const rule = { person: 'Sara Khan', email: 'sara.khan@example.com' }
+    expect(isRulePerson(rule, { name: 'Sara Khan', email: 'sara.khan@example.com', handle: '' })).toBe(true)
+    expect(isRulePerson(rule, { name: 'Sara Khan', email: 'sara.khan@elsewhere.com', handle: '' })).toBe(false)
+    expect(isRulePerson(rule, { name: 'Sara Khan', email: '', handle: 'U1' })).toBe(true)
   })
 })

@@ -62,7 +62,7 @@ export function rowsOf(setup: InboxSetup, state: InboxState, now: number): Row[]
           : { source, dot: 'faint', status: problem?.message ? fit(problem.message, 300, 14) : 'Not connected', how: isConnector ? "Claude's Gmail connector" : 'Direct', action: ['sources:steps:gmail', setup.steps === 'gmail' ? 'Hide steps' : 'Connect', setup.steps === 'gmail' ? 'outline' : 'primary'], pill: null })
     } else {
       const isOn = setup[source]
-      out.push(isOn ? { source, dot: live(source) || isDemo ? 'green' : 'amber', status: problem?.state === 'error' ? problem.message : 'Every 60 s', how: `Claude's ${SOURCE_NAME[source]} connector`, action: null, pill: ['Connected', 'green'] }
+      out.push(isOn ? { source, dot: live(source) || isDemo ? 'green' : 'amber', status: problem?.state === 'error' || problem?.state === 'permission' ? problem.message : 'Every 60 s', how: `Claude's ${SOURCE_NAME[source]} connector`, action: null, pill: ['Connected', 'green'] }
         : { source, dot: 'faint', status: "Not on in this session: turn it on in the session's connectors", how: `Claude's ${SOURCE_NAME[source]} connector`, action: ['sources:connectors', 'Connect ↗', 'outline'], pill: null })
     }
   }

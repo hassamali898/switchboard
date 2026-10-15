@@ -511,6 +511,10 @@ export type AutoRule = {
   name: string
   /** Whose messages it acts on; '' for anyone. */
   person: string
+  /** The person's address: typed, or found among your Inbox's senders; '' when neither (then the name). */
+  email: string
+  /** The address was found in your Inbox, not typed: the card says so, so you can see who it means. */
+  isEmailFound: boolean
   /** Empty: every source the pairs fit. */
   sources: InboxSourceId[]
   pairs: AutoPair[]

@@ -1,6 +1,6 @@
 {
   "name": "switchboard",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0-beta.2",
   "description": "Separate Claude Code features in one plugin: live Files tree, Replay, Blast Radius, Agents, Reflect, Cache Tax, and an Inbox (Slack, Gmail, Calendar, GitHub, Jira) in its own Haiku session.",
   "author": {
     "name": "hassamali898"

@@ -933,7 +933,7 @@ Each phase lists its scope, tasks, edge cases, tests and a gate. A phase is done
 **Inbox review against v1 and the design (2026-10-12)**, built and checked in tests, not yet in the app:
 - **Your call:** a message opens under its row in the Inbox pane in **any** session, and is answered there. Drafting is a Haiku side call that never enters the coding chat. This replaces screen 4's reply card above the prompt and the "Replies are written in the Inbox session" toast.
 - The open message: who, kind, time, title, details, the whole text (Gmail's thread through the connector, Jira's description and comments), attachments, and Open in Gmail, Slack, Jira or GitHub.
-- The reply (ported from v1): Short, Detailed and Ask a question; Reply all (Gmail); Retry; Improve (Shorter, Friendlier, More formal, Fix grammar, or your words; before and after; Use this); Edit; Save draft (Gmail Drafts through the connector); Skip. Send has a 10 s Undo. After sending: Sent as you, and Delete from Slack. If the original was edited: "I re-read it · send".
+- The reply (ported from v1): Short, Detailed and Ask a question; Reply all (Gmail); Retry; Improve (Shorter, Friendlier, More formal, Fix grammar, or your words; before and after; Use this); Edit; Save draft (Gmail Drafts through the connector); Skip. Send has a 5 s Undo. After sending: Sent as you, and Delete from Slack. If the original was edited: "I re-read it · send".
 - Gmail through Claude's connector sends again (v1's path: `send_plan`, a fresh `get_thread` check, the connector's `reply`, `send_done`).
 - Calendar: Join now, Open in Calendar. GitHub: Open on GitHub, Ask Claude to review (fills your prompt). Jira: status, Move to (the issue's real transitions), Comment. All checked against the live Atlassian connector.
 - The pane: Mark all read, Sources and Auto buttons, a banner per source that needs you (Resume or Fix), a demo note with "Use my accounts", "All caught up".
@@ -1048,7 +1048,7 @@ Each phase lists its scope, tasks, edge cases, tests and a gate. A phase is done
 
 **Still missing:** sending replies to Gmail that came through Claude's connector (the task fails with a note; the connector may only offer drafts); the out-of-office rule type; a rule's stronger model and its cost on the card; the 12-hour activity chart; GitHub and Jira writes are unverified against the real connectors. Demo mode is the way to try it: `/sb-auto Bilal Ahmed: if he asks a question, draft a reply`, then `/sb-inbox demo on`, and his "Lunch at 1?" arrives 20 s later.
 
-**Phase 9 fixes found here:** the desktop app names claude.ai connectors by an id (`mcp__642375f5-…__searchJiraIssuesUsingJql`), so Gmail, Calendar, GitHub and Jira are now found by their tools' descriptions, and polling only ever picks a read tool. Checked against the live Atlassian connector: Jira's search needs a `cloudId` (from `getAccessibleAtlassianResources`) and answers `{ issues: { nodes } }` with `webUrl`.
+**Phase 9 fixes found here:** the desktop app names claude.ai connectors by an id (`mcp__<id>__searchJiraIssuesUsingJql`), so Gmail, Calendar, GitHub and Jira are now found by their tools' descriptions, and polling only ever picks a read tool. Checked against the live Atlassian connector: Jira's search needs a `cloudId` (from `getAccessibleAtlassianResources`) and answers `{ issues: { nodes } }` with `webUrl`.
 
 ---
 

@@ -32,6 +32,10 @@ export type InboxActions = {
   sources: () => void
   openAuto: () => void
   resume: (source: string) => void
+  /** A source whose last check failed: check it again now. */
+  recheck: (source: string) => void
+  /** A source refused by the permission rules: put the request to allow its read-only tools in the prompt. */
+  allow: (source: string) => void
   demoOff: () => void
   /** The open message. */
   link: () => void
@@ -71,6 +75,9 @@ function run(actions: InboxActions, key: string, cardId = ''): void {
   if (key.startsWith('inbox:open:')) actions.open(key.slice('inbox:open:'.length))
   else if (key.startsWith('inbox:filter:')) actions.filter(key.slice('inbox:filter:'.length))
   else if (key.startsWith('inbox:resume:')) actions.resume(key.slice('inbox:resume:'.length))
+  else if (key.startsWith('inbox:recheck:')) actions.recheck(key.slice('inbox:recheck:'.length))
+  else if (key.startsWith('inbox:allow:')) actions.allow(key.slice('inbox:allow:'.length))
+  else if (key.startsWith('inbox:fix:')) actions.sources()
   else if (key.startsWith('reply:opt:')) actions.option(key.slice('reply:opt:'.length) as ReplyOption)
   else if (key.startsWith('jira:move:')) actions.move(key.slice('jira:move:'.length))
   else if (/^reply:improve:\d$/.test(key)) actions.improvePreset(Number(key.slice(-1)))
@@ -95,7 +102,7 @@ const itemAlt = (item: InboxItem, now: number) => `${SOURCE_NAME[item.source]} f
 /** Sources that need you: stopped, paused, not set up. */
 export function problemsOf(state: InboxState): Problem[] {
   return Object.entries(state.sources)
-    .filter(([, one]) => ['error', 'auth', 'paused', 'setup'].includes(one.state))
+    .filter(([, one]) => ['error', 'permission', 'auth', 'paused', 'setup'].includes(one.state))
     .map(([source, one]) => ({ source, state: one.state, message: one.message }))
     .slice(0, 6)
 }

@@ -25,6 +25,8 @@ export const ASKS: readonly AutoAsk[] = ['question', 'pr_review', 'meeting', 'fy
 
 /** Each kind of ask has one thing to do about it. */
 export const DO_FOR: Record<AutoAsk, AutoDo> = { question: 'reply', pr_review: 'review', meeting: 'book', fyi: 'archive' }
+/** What else an ask may lead to: a reply ("asks for a review → say yes"), never archiving someone who asked. */
+export const DO_CHOICES: Record<AutoAsk, readonly AutoDo[]> = { question: ['reply'], pr_review: ['review', 'reply'], meeting: ['book', 'reply'], fyi: ['archive'] }
 
 /** Where each action can come from. */
 export const DO_SOURCES: Record<AutoDo, readonly InboxSourceId[]> = {
@@ -132,8 +134,39 @@ const norm = (text: string) => text.toLowerCase().replace(/[^a-z0-9@.]+/g, ' ').
 export function isPerson(person: string, from: InboxItem['from']): boolean {
   const wanted = norm(person)
   if (!wanted) return true
-  return [from.name, from.email, from.handle].some(value => !!value && norm(value) === wanted) ||
-    (!!from.email && wanted.includes('@') && from.email.toLowerCase() === wanted)
+  if ([from.name, from.email, from.handle].some(value => !!value && norm(value) === wanted) ||
+    (!!from.email && wanted.includes('@') && from.email.toLowerCase() === wanted)) return true
+  // Claude's Gmail connector often gives only the address: then "Sara Khan" is sara.khan@… (a sender
+  // whose display name came through is held to that name).
+  const local = from.email.split('@')[0] ?? ''
+  const isBare = !from.name || norm(from.name) === norm(from.email)
+  return isBare && !!local && norm(local.replace(/[._-]+/g, ' ')) === wanted
+}
+
+const EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/
+
+/** The rule's person is the sender: by the address when the rule has one and the message carries one
+ * (Gmail), else by name or handle (Slack gives no address). */
+export function isRulePerson(rule: Pick<AutoRule, 'person' | 'email'>, from: InboxItem['from']): boolean {
+  if (rule.email && from.email) return from.email.toLowerCase() === rule.email
+  return isPerson(rule.person, from)
+}
+
+/** The address a rule's person writes from: the one typed, else one your Inbox has seen them use (by
+ * display name first, then by an address-only sender's name); '' when none. */
+export function emailFor(person: string, items: readonly InboxItem[]): string {
+  if (EMAIL.test(person.trim())) return person.trim().toLowerCase()
+  if (!norm(person)) return ''
+  const senders = items.map(item => item.from).filter(from => EMAIL.test(from.email))
+  const named = senders.find(from => !!from.name && norm(from.name) === norm(person))
+  return (named ?? senders.find(from => isPerson(person, from)))?.email.toLowerCase() ?? ''
+}
+
+/** Who the rule acts on, as its card says it: the address and where it came from, or that there is none. */
+export function whoText(rule: Pick<AutoRule, 'person' | 'email' | 'isEmailFound'>): string {
+  if (!norm(rule.person) && !rule.email) return 'Anyone'
+  if (!rule.email) return 'No email found: matches the name only'
+  return rule.isEmailFound ? `${rule.email} (found in your Inbox)` : rule.email
 }
 
 /** Bots and automated senders never trigger a rule, so two auto-repliers can't loop. */
@@ -165,7 +198,7 @@ export function blockedBy(state: AutoState, rule: AutoRule, item: InboxItem, now
   if (item.isExcluded) return 'excluded from Claude'
   if (isBot(item)) return 'from a bot'
   if (!sourcesOf(rule).includes(item.source)) return 'another source'
-  if (!isPerson(rule.person, item.from)) return 'someone else'
+  if (!isRulePerson(rule, item.from)) return 'someone else'
   if (!pairsFor(rule, item).length) return 'nothing to do here'
   if (rule.workHours && !inWorkHours(now)) return 'outside work hours'
   if (rule.repos.length && item.url.includes('github.com') && !repoMatches(item.url, rule.repos)) return 'another repo'
@@ -390,8 +423,12 @@ export function ruleOf(raw: unknown): AutoRule | null {
   const sources = (Array.isArray(value.sources) ? value.sources : []).filter((one): one is InboxSourceId =>
     ['slack', 'gmail', 'calendar', 'github', 'jira'].includes(one as string))
   const cap = typeof value.cap === 'number' && Number.isFinite(value.cap) ? Math.min(MAX_CAP, Math.max(1, Math.round(value.cap))) : DEFAULT_CAP
+  const person = asString(value.person, 120)
+  const typed = EMAIL.test(person.trim()) ? person.trim().toLowerCase() : ''
+  const email = EMAIL.test(asString(value.email, 120)) ? asString(value.email, 120).toLowerCase() : typed
   return {
-    id: value.id.slice(0, 40), name: asString(value.name, 60) || asString(value.person, 60) || 'Rule', person: asString(value.person, 120),
+    id: value.id.slice(0, 40), name: asString(value.name, 60) || person.slice(0, 60) || 'Rule', person,
+    email, isEmailFound: !!email && email !== typed && value.isEmailFound === true,
     sources, pairs, repos: (Array.isArray(value.repos) ? value.repos : []).map(one => asString(one, 80)).filter(one => /^[\w.*/-]+$/.test(one)).slice(0, 6),
     workHours: value.workHours === true, cap, mode: value.mode === 'auto' ? 'auto' : 'ask', isOn: value.isOn !== false,
     instructions: asString(value.instructions, 1_000), createdAt: typeof value.createdAt === 'number' ? value.createdAt : 0,
@@ -403,7 +440,10 @@ function pairOf(raw: unknown): AutoPair[] {
   const value = raw as Record<string, unknown>
   const when = value.when as AutoAsk
   if (!ASKS.includes(when)) return []
-  // Each ask has its one action: a model can't pair "asks a question" with "archive".
-  const action = DO_FOR[when]
-  return [{ when, whenText: asString(value.whenText, 60) || WHEN_TEXT[when], do: action, doText: asString(value.doText, 60) || DO_TEXT[action] }]
+  // Only the actions that ask allows: a model can't pair "asks a question" with "archive".
+  const wanted = value.do as AutoDo
+  const action = DO_CHOICES[when].includes(wanted) ? wanted : DO_FOR[when]
+  // The card says what will run: the model's words only when its action was kept.
+  const doText = action === wanted || !value.do ? asString(value.doText, 60) : ''
+  return [{ when, whenText: asString(value.whenText, 60) || WHEN_TEXT[when], do: action, doText: doText || DO_TEXT[action] }]
 }

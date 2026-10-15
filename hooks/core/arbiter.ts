@@ -13,6 +13,8 @@ import type { ArbiterState, Card, CardKind, PaneReason, PaneView } from '../../t
 export type { ArbiterState, Card, CardKind, PaneReason, PaneView }
 
 export const PANE_ID = 'switchboard'
+/** The side pane's width asked for on every open (about 660 px on the desktop): a width you drag it to wins. */
+export const PANE_COLUMNS = 84
 
 const CARD_RANK: Record<CardKind, number> = { meeting: 8, blast: 7, cache: 6, check: 5, rule: 4, needs: 2, reflect: 1 }
 

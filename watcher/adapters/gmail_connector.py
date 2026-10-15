@@ -13,7 +13,7 @@ import email.utils
 from datetime import datetime, timezone
 from typing import Any, Optional
 
-from ..items import Item, Person, Thread, one_line, ts_to_iso
+from ..items import Item, Person, Thread, is_self_test, one_line, ts_to_iso
 
 SKIP_LABELS = {"SENT", "DRAFT", "SPAM", "TRASH", "CHAT"}
 
@@ -107,9 +107,10 @@ def normalize_thread(thread: dict[str, Any], me: Optional[str]) -> Optional[Item
     latest = max(messages, key=lambda m: timestamp(field(m, "date", "internal_date")))
     labels = set(field(latest, "label_ids", default=[]) or [])
     sender = person(field(latest, "sender", "from"))
-    if labels & SKIP_LABELS or "INBOX" not in labels:
+    is_test = is_self_test(str(field(latest, "subject", default="")))
+    if labels & (SKIP_LABELS - {"SENT"} if is_test else SKIP_LABELS) or "INBOX" not in labels:
         return None
-    if me and sender.email.lower() == me.lower():
+    if me and sender.email.lower() == me.lower() and not is_test:
         return None
     message_id = str(field(latest, "id", "message_id", default=""))
     thread_id = str(field(thread, "id", "thread_id", default="")) or str(field(latest, "thread_id", default=""))

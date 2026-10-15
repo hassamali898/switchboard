@@ -225,6 +225,17 @@ def test_connector_failed_send_can_retry(queue):
     assert actions.connector_send_plan(queue, item.id, "hi", "k2", target)["ok"]
 
 
+def test_connector_rule_reply_is_held_to_the_cap(queue):
+    cli.run("ingest", {"source": "gmail", "threads": [thread()]}, queue, actions.Clients())
+    item = queue.get("gmail:m1")
+    target = actions.describe_target(item, False, "")
+    actions.connector_send_plan(queue, item.id, "Tuesday works.", "auto:r1:a", target, rule="Sara", cap=1)
+    actions.connector_send_done(queue, item.id, "auto:r1:a", {"id": "s1"}, rule="Sara")
+    with pytest.raises(actions.SendBlocked) as err:
+        actions.connector_send_plan(queue, item.id, "Wednesday too.", "auto:r1:b", target, rule="Sara", cap=1)
+    assert err.value.code == "cap"
+
+
 def test_direct_send_refuses_connector_items(queue):
     cli.run("ingest", {"source": "gmail", "threads": [thread()]}, queue, actions.Clients())
     with pytest.raises(actions.SendBlocked) as err:

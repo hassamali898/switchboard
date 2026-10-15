@@ -57,7 +57,8 @@ PY=$(find_python) || {
   exit 2
 }
 echo "Setting up Switchboard with $PY …" >&2
-[ -x "$VENV/bin/python" ] || "$PY" -m venv "$VENV" >&2
+# --clear: a venv whose Python was removed (e.g. a Homebrew upgrade) keeps a dead python link otherwise.
+"$VENV/bin/python" -c "" 2>/dev/null || "$PY" -m venv --clear "$VENV" >&2
 "$VENV/bin/python" -m pip install --quiet --disable-pip-version-check --upgrade pip >&2
 "$VENV/bin/python" -m pip install --quiet --disable-pip-version-check -e "$ROOT" >&2
 want_stamp > "$STAMP"

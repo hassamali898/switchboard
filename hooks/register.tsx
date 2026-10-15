@@ -5,7 +5,7 @@
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, HookStream, ProcessSpawnChunk, ProcessSpawnResult, Register, RenderSurface } from 'claude-code'
 import {
-  AUTO_CLOSE_MS, PANE_ID, bandPlan, clearAutoBlocks, pruneCards, dropCard, dropCardsOf, initialArbiter, paneClosed, pushCard, releasePane, requestPane, shouldAutoClose,
+  AUTO_CLOSE_MS, PANE_COLUMNS, PANE_ID, bandPlan, clearAutoBlocks, pruneCards, dropCard, dropCardsOf, initialArbiter, paneClosed, pushCard, releasePane, requestPane, shouldAutoClose,
   touchPane, type PaneDecision, type PaneView,
 } from './core/arbiter.ts'
 import {
@@ -43,7 +43,7 @@ import { cacheCard, type CacheActions } from './features/cache/view.tsx'
 import { dueCard, countdown, joinable, withMeetings, type Meeting } from './features/meeting/model.ts'
 import { meetingCard, type MeetingActions } from './features/meeting/view.tsx'
 import {
-  REMIND_MS, REPLY_SOURCES, SOURCE_NAME as SOURCE_NAME_OF, UNDO_MS, ago as inboxAgo, bellCount as inboxBell, canSend as canSendReply, dismiss as dismissItem, eventOf, initialInbox, markAllRead as markAllInboxRead,
+  REMIND_MS, REPLY_SOURCES, SOURCE_NAME as SOURCE_NAME_OF, UNDO_MS, ago as inboxAgo, allowRequest, refusedRules, bellCount as inboxBell, canSend as canSendReply, dismiss as dismissItem, eventOf, initialInbox, markAllRead as markAllInboxRead,
   markRead, needsCard, onEvent as onInboxEvent, remindLater, replyItem, replyKey, replyText, startReply, statusLine as inboxStatus, withReply, type InboxItem,
   type InboxReply, type InboxState,
 } from './features/inbox/model.ts'
@@ -77,7 +77,7 @@ import {
 import { replayDesktop, replayKey, replayText, type ReplayActions } from './features/replay/view.tsx'
 import {
   ASK_LABELS, AUTO_MODEL, CLASSIFY_MS, MAX_SEEN, addTask, candidates as autoCandidates, classifyText, countUse, initialAuto, isPlainAsk, logIt,
-  actsAlone, markUndone, newTask, nextCheck, pauseAll, repoMatches, restore as restoreAuto, rollDay as rollAutoDay, running as autoRunning, setRule, setTask,
+  actsAlone, emailFor, markUndone, newTask, nextCheck, pauseAll, repoMatches, restore as restoreAuto, rollDay as rollAutoDay, running as autoRunning, setRule, setTask,
   statusLine as autoStatus, stored as autoStored, saveRule as withSavedRule, taskOf as autoTaskOf, taskText as autoTaskText, verdictOf, findRule, deleteRule,
   type AutoPair, type AutoRule, type AutoState, type AutoTask,
 } from './features/auto/model.ts'
@@ -140,7 +140,7 @@ async function devLog($: EngineInterface, entry: Record<string, unknown>): Promi
   const list = entry.event === 'draw' ? devDraws : devEvents
   list.push({ at: new Date(await $.clock.now()).toISOString(), ...entry })
   if (list.length > 60) list.splice(0, list.length - 60)
-  await $.fs.write(`${$.plugin.root}/.sb-dev-log.json`, JSON.stringify({ events: devEvents, draws: devDraws.slice(-10) }, null, 1))
+  await $.fs.write(`${$.plugin.root}/.sb-dev-log-${here.sessionId.slice(0, 8)}.json`, JSON.stringify({ events: devEvents, draws: devDraws.slice(-10) }, null, 1))
 }
 
 const commandContext = (current: Settings): CommandContext => ({
@@ -177,6 +177,7 @@ async function showPane($: EngineInterface, view: PaneView): Promise<boolean> {
   await $.ui.open({
     id: PANE_ID,
     title: view.title,
+    columns: PANE_COLUMNS,
     // A hold acts as a dialog. `focus` is a request: refused while you type or a dialog is up.
     ...(view.reason === 'hold' ? { focus: true, closeOnEscape: true, holdToasts: true } as const : {}),
   })
@@ -478,7 +479,7 @@ async function releaseAuto($: EngineInterface, owner: string): Promise<void> {
     out.decision = result.decision
     return result.state
   })
-  if (out.decision?.kind === 'show') await $.ui.open({ id: PANE_ID, title: out.decision.view.title })
+  if (out.decision?.kind === 'show') await $.ui.open({ id: PANE_ID, title: out.decision.view.title, columns: PANE_COLUMNS })
   else if (out.decision?.kind === 'close') await $.ui.close({ id: PANE_ID })
 }
 
@@ -684,7 +685,7 @@ async function showBlast($: EngineInterface, id: string): Promise<void> {
     return result.state
   })
   const opened = out.decision?.kind === 'show'
-    ? await $.ui.open({ id: PANE_ID, title: BLAST_VIEW.title, focus: true, closeOnEscape: true, holdToasts: true }).catch(() => null)
+    ? await $.ui.open({ id: PANE_ID, title: BLAST_VIEW.title, columns: PANE_COLUMNS, focus: true, closeOnEscape: true, holdToasts: true }).catch(() => null)
     : null
   // Placed but hidden (the side panel collapsed) counts as not shown.
   const isShown = !!opened?.isPlaced && (await $.ui.panes().catch(() => [])).some(pane => pane.id === PANE_ID && pane.isShown !== false)
@@ -1200,8 +1201,8 @@ async function pollGmail($: EngineInterface): Promise<void> {
     const now = Math.floor((await $.clock.now()) / 1000)
     const since = gmailLink.cursorSec || now - 86_400
     const query = gmailLink.cursorSec
-      ? `in:inbox -in:sent -in:draft after:${Math.max(0, since - 120)}`
-      : 'in:inbox -in:sent -in:draft is:unread newer_than:1d'
+      ? `in:inbox -in:draft {-in:sent sbtest} after:${Math.max(0, since - 120)}`
+      : 'in:inbox -in:draft {-in:sent sbtest} is:unread newer_than:1d'
     const result = await $.mcp.call(server, 'search_threads', { query, pageSize: 10, view: 'THREAD_VIEW_MINIMAL' })
     if (isMcpError(result)) throw new Error(mcpErrorText(result) || 'Gmail refused the search.')
     const ingested = await ingest($, { source: 'gmail', threads: connectorThreads(result) })
@@ -1209,7 +1210,7 @@ async function pollGmail($: EngineInterface): Promise<void> {
     gmailLink.cursorSec = now // only after it all went in: a failed check is asked again next time
     await setInbox($, state => ({ ...state, sources: { ...state.sources, gmail: { state: 'live', message: '' } } }))
   } catch (error) {
-    await setInbox($, state => ({ ...state, sources: { ...state.sources, gmail: { state: 'error', message: error instanceof Error ? error.message.slice(0, 200) : 'Gmail check failed.' } } }))
+    await sourceFailed($, 'gmail', error)
   } finally {
     gmailLink.isPolling = false
   }
@@ -1270,10 +1271,24 @@ async function findConnector($: EngineInterface, source: ConnectorSource): Promi
   return connectorLink.servers[source] ?? null
 }
 
-const READ_NEVER = /create|update|delete|remove|add|edit|post|send|transition|merge|close|move|write|set|cancel|respond/i
+/** A source's refused read-only tools, as permission rules, for its Allow button. */
+const allowRules = new Map<string, string[]>()
+
+const READ_NEVER =/create|update|delete|remove|add|edit|post|send|transition|merge|close|move|write|set|cancel|respond/i
 
 async function setConnectorSource($: EngineInterface, source: string, state: string, message: string): Promise<void> {
+  if (message) await devLog($, { event: 'source', source, state, message }).catch(() => undefined)
   await setInbox($, current => ({ ...current, sources: { ...current.sources, [source]: { state, message: message.slice(0, 200) } } }))
+}
+
+/** A source's check failed: refused by the person's permission rules (Allow asks them to let its read-only
+ * tools through), or any other error (Fix checks again). */
+async function sourceFailed($: EngineInterface, source: string, error: unknown): Promise<void> {
+  const message = error instanceof Error ? error.message : String(error)
+  const name = SOURCE_NAME_OF[source as keyof typeof SOURCE_NAME_OF] ?? source
+  const rules = refusedRules(source, message)
+  if (rules) allowRules.set(source, rules)
+  await setConnectorSource($, source, rules ? 'permission' : 'error', rules ? `Needs your OK to read ${name}` : message.slice(0, 200) || `${name} check failed.`)
 }
 
 /** A connector's read: the records, or a throw (pollAll shows it on the source, and no cursor moves). */
@@ -1693,7 +1708,10 @@ async function connectorCall($: EngineInterface, server: string, name: string, t
     const result = await $.mcp.call(server, tool, args)
     return isMcpError(result) ? { ok: false, data: null, text: mcpErrorText(result) || `${name} refused it.` } : { ok: true, data: mcpPayload(result), text: '' }
   } catch (error) {
-    return { ok: false, data: null, text: (error instanceof Error ? error.message : String(error)).slice(0, 300), isUnsure: true }
+    const text = (error instanceof Error ? error.message : String(error)).slice(0, 300)
+    // Stopped by the permission check: the tool never ran, so it is a plain failure, never "maybe sent".
+    const refusal = text.split(') refused: ')[1]
+    return refusal !== undefined ? { ok: false, data: null, text: `Claude's permission check stopped it (${refusal})` } : { ok: false, data: null, text, isUnsure: true }
   }
 }
 
@@ -1931,7 +1949,7 @@ async function loadJira($: EngineInterface, item: InboxItem): Promise<void> {
   if (!issue.ok && item.via !== 'demo') $.ui.toast(`Jira: ${issue.text}`.slice(0, 200))
 }
 
-/** After the 10 s Undo: the one guarded send path (recipient, not twice, the original still there). */
+/** After the 5 s Undo: the one guarded send path (recipient, not twice, the original still there). */
 async function sendReply($: EngineInterface, ackChanges = false): Promise<void> {
   link.send = undefined
   openMsg.tick?.cancel()
@@ -1971,8 +1989,9 @@ async function sendReply($: EngineInterface, ackChanges = false): Promise<void> 
  * there, then the reply. A send that may have gone out (the call threw) keeps its key claimed, so it is
  * never sent again blind.
  */
-async function sendThroughConnector($: EngineInterface, item: InboxItem, text: string, key: string, target: string, replyAll: boolean): Promise<Cli> {
-  const plan = await cli($, 'send_plan', { ref: item.id, text, idempotency_key: key, confirm_target: target, reply_all: replyAll })
+async function sendThroughConnector($: EngineInterface, item: InboxItem, text: string, key: string, target: string, replyAll: boolean,
+  byRule: { rule: string; cap: number } | null = null): Promise<Cli> {
+  const plan = await cli($, 'send_plan', { ref: item.id, text, idempotency_key: key, confirm_target: target, reply_all: replyAll, ...byRule })
   if (plan.ok === false) return plan
   const fail = async (code: string, error: string): Promise<Cli> => {
     await cli($, 'send_failed', { idempotency_key: key, code, error })
@@ -1989,7 +2008,7 @@ async function sendThroughConnector($: EngineInterface, item: InboxItem, text: s
     }
     const sent = await slackCall($, 'slack_send_message', { channel_id: channel, message: text, ...(threadTs ? { thread_ts: threadTs } : {}) })
     if (!sent.ok) return sent.isUnsure ? unsure('Slack') : fail('send_failed', `Slack didn't accept the reply: ${sent.text}. Nothing was sent.`)
-    return cli($, 'send_done', { ref: item.id, idempotency_key: key, result: { channel } })
+    return cli($, 'send_done', { ref: item.id, idempotency_key: key, result: { channel }, rule: byRule?.rule ?? '' })
   }
   const { message_id: messageId = '', thread_id: threadId = '' } = (plan.plan ?? {}) as { message_id?: string; thread_id?: string }
   const thread = await gmailCall($, 'get_thread', { threadId, messageFormat: 'METADATA_ONLY' })
@@ -1997,7 +2016,7 @@ async function sendThroughConnector($: EngineInterface, item: InboxItem, text: s
   if (!gmailThreadHas(thread.data, messageId)) return fail('original_gone', 'The email you are answering was deleted. Nothing was sent.')
   const sent = await gmailCall($, 'reply', gmailReplyArgs(messageId, text, replyAll))
   if (!sent.ok) return sent.isUnsure ? unsure('Gmail') : fail('send_failed', `Gmail didn't accept the reply: ${sent.text}. Nothing was sent; Save draft keeps it.`)
-  return cli($, 'send_done', { ref: item.id, idempotency_key: key, reply_all: replyAll, result: { id: String(gmailField(sent.data, 'id') ?? '') } })
+  return cli($, 'send_done', { ref: item.id, idempotency_key: key, reply_all: replyAll, result: { id: String(gmailField(sent.data, 'id') ?? '') }, rule: byRule?.rule ?? '' })
 }
 
 async function closeReply($: EngineInterface): Promise<void> {
@@ -2116,6 +2135,16 @@ function inboxActions($: EngineInterface): InboxActions {
       await setInbox($, state => ({ ...state, sources: { ...state.sources, [source]: { state: 'live', message: '' } } }))
       $.ui.toast(`${source}: checking again.`)
       await refreshSources($)
+    }),
+    allow: source => later(async () => {
+      const rules = allowRules.get(source)
+      if (!rules) return pollAll($)
+      await $.prompt.fill({ text: allowRequest(SOURCE_NAME_OF[source as keyof typeof SOURCE_NAME_OF] ?? source, rules) })
+      $.ui.toast('Press Enter to send it. Claude asks before changing your settings.')
+    }),
+    recheck: source => later(async () => {
+      $.ui.toast(`${SOURCE_NAME_OF[source as keyof typeof SOURCE_NAME_OF] ?? source}: checking again.`)
+      await pollAll($)
     }),
     demoOff: () => later(() => setDemo($, false)),
     link: () => later(async () => {
@@ -2556,7 +2585,7 @@ async function pollAll($: EngineInterface): Promise<void> {
         done[source] = 'another window'
         continue
       }
-      await poll().catch(error => setConnectorSource($, source, 'error', (error instanceof Error ? error.message : String(error)).slice(0, 200)))
+      await poll().catch(error => sourceFailed($, source, error))
       const after = (await read($, inbox)).sources[source]
       done[source] = `${after?.state ?? '?'} ${after?.message ?? ''}`.trim().slice(0, 120)
     }
@@ -2681,6 +2710,7 @@ async function considerItem($: EngineInterface, item: InboxItem): Promise<void> 
   const { list, skipped } = autoCandidates(state, item, now)
   for (const one of skipped) await setAuto($, current => logIt(current, `${one.rule.name} skipped ${item.from.name}: ${one.why}`, now))
   let winner: { rule: AutoRule; pair: AutoPair } | null = null
+  const readAs: string[] = []
   for (const candidate of list) {
     if (winner) {
       const taken = winner.rule.name
@@ -2689,13 +2719,17 @@ async function considerItem($: EngineInterface, item: InboxItem): Promise<void> 
     }
     for (const pair of candidate.pairs) {
       const label = isPlainAsk(pair, item) ? ASK_LABELS[pair.when][0] : await classifyWithin($, classifyText(item), ASK_LABELS[pair.when])
+      readAs.push(`${pair.when}: ${label ?? 'no answer'}`)
       // Only a clear "asks" goes on; "no", "unclear" and a timeout leave it a normal item.
       if (verdictOf(pair.when, label) === 'asks') {
         winner = { rule: candidate.rule, pair }
         break
       }
     }
+    // Said in the log, so "nothing happened" has a reason you can see.
+    if (!winner) await setAuto($, current => logIt(current, `${candidate.rule.name} left ${item.from.name}'s message: it doesn't clearly ${candidate.pairs.map(pair => pair.whenText.toLowerCase()).join(' or ')}`, now))
   }
+  await devLog($, { event: 'auto', item: item.id, rules: state.rules.length, candidates: list.map(one => one.rule.name), skipped: skipped.map(one => `${one.rule.name}: ${one.why}`), read: readAs, winner: winner?.rule.name ?? '' }).catch(() => undefined)
   if (winner) await startTask($, winner.rule, winner.pair, item)
 }
 
@@ -2717,11 +2751,10 @@ async function startTask($: EngineInterface, rule: AutoRule, pair: AutoPair, ite
   const cap = await cli($, 'cap', { rule: rule.name, cap: rule.cap })
   if (cap.allowed === false) return failTask($, id, 'daily cap reached', 'skipped')
   if (pair.do === 'reply') {
-    if (item.via === 'connector') return failTask($, id, "Messages that came through Claude's connectors can't be answered by a rule yet. Reply from the Inbox pane.")
     const target = await cli($, 'target', { ref: item.id, reply_all: false })
     if (typeof target.target !== 'string') return failTask($, id, String(target.error ?? "Couldn't tell where the reply goes."))
-    const thread = await cli($, 'thread', { ref: item.id })
-    const answer = await $.model.complete(draftsRequest(item, threadOf(thread))).catch(() => null)
+    // A connector's message: its thread through the connector, as the pane reads it.
+    const answer = await $.model.complete(draftsRequest(item, await threadFor($, item))).catch(() => null)
     const drafts = answer?.isAnswered ? parseDrafts(answer.text) : null
     const usd = answer ? draftUsd(answer.usage) : 0
     if (!drafts) return failTask($, id, "Couldn't draft a reply.")
@@ -2774,9 +2807,11 @@ async function doTask($: EngineInterface, id: string): Promise<void> {
     if (!item) return failTask($, id, 'The message is no longer in the Inbox.')
     return runAgent($, rule, { ...task, state: 'running' }, item)
   }
-  const done = task.do === 'reply'
-    ? await cli($, 'send', { ref: task.itemId, text: autoTaskText(task), idempotency_key: `auto:${rule.id}:${task.itemId}`, confirm_target: task.target, rule: rule.name, cap: rule.cap })
-    : await cli($, 'archive', { ref: task.itemId, rule: rule.name, cap: rule.cap })
+  const key = `auto:${rule.id}:${task.itemId}`
+  // A connector's message goes through the pane's guarded connector path, held to the rule's cap.
+  const done = task.do !== 'reply' ? await cli($, 'archive', { ref: task.itemId, rule: rule.name, cap: rule.cap })
+    : item?.via === 'connector' ? await sendThroughConnector($, item, autoTaskText(task), key, task.target, false, { rule: rule.name, cap: rule.cap })
+      : await cli($, 'send', { ref: task.itemId, text: autoTaskText(task), idempotency_key: key, confirm_target: task.target, rule: rule.name, cap: rule.cap })
   if (done.ok === false) {
     $.ui.toast(`${task.title}: ${String(done.error ?? 'not done').slice(0, 160)}`)
     return failTask($, id, String(done.error ?? 'Not done.'), done.code === 'cap' ? 'skipped' : 'failed')
@@ -2859,7 +2894,10 @@ async function makeRule($: EngineInterface, request: string): Promise<void> {
   await setAuto($, state => ({ ...state, draft: { phase: 'making', request, rule: null, error: '' } }))
   await update($, arbiter, state => pushCard(state, { id: 'auto:rule', kind: 'rule', at: now }))
   const answer = await $.model.complete(ruleRequest(request)).catch(() => null)
-  const rule = answer?.isAnswered ? parseRule(answer.text, `r${now.toString(36)}`, now) : null
+  const parsed = answer?.isAnswered ? parseRule(answer.text, `r${now.toString(36)}`, now) : null
+  // A name gets the address your Inbox has seen that person use, and the card shows it.
+  const email = parsed && !parsed.email ? emailFor(parsed.person, (await read($, inbox)).items) : ''
+  const rule = parsed && email ? { ...parsed, email, isEmailFound: true } : parsed
   const usd = answer ? ruleUsd(answer.usage) : 0
   await setAuto($, state => ({
     ...state, costToday: state.costToday + usd,

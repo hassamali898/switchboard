@@ -672,7 +672,7 @@ describe('Inbox', () => {
     expect(models.complete).toBe(0)
   })
 
-  test('the Inbox session: open a message in the pane, three drafts from Haiku, Send after the 10 s Undo', async ($, on) => {
+  test('the Inbox session: open a message in the pane, three drafts from Haiku, Send after the 5 s Undo', async ($, on) => {
     const { fake, calls } = inboxEngine(on, 'terminal', { settings: { inboxSessionId: 'session-1' } })
     await $.session.start({ cwd: '/work/project', surface: 'terminal', isInteractive: true })
     await fake.clock.advance(2_000)
@@ -690,7 +690,7 @@ describe('Inbox', () => {
     await fake.clock.advance(5)
     await pane.press({ key: 'reply:send' })
     await fake.clock.advance(5)
-    expect(JSON.stringify(await pane.drawn())).toContain('sending in 10 s')
+    expect(JSON.stringify(await pane.drawn())).toContain('sending in 5 s')
     expect(calls).not.toContain('send')
     await fake.clock.advance(10_000)
     expect(calls).toContain('send')
@@ -698,7 +698,7 @@ describe('Inbox', () => {
     expect(JSON.stringify(await pane.drawn())).toContain('Sent as you')
   })
 
-  test('Undo during the 10 s stops the send; Improve rewrites the draft; Save draft keeps it', async ($, on) => {
+  test('Undo during the 5 s stops the send; Improve rewrites the draft; Save draft keeps it', async ($, on) => {
     const { fake, calls } = inboxEngine(on, 'terminal', { settings: { inboxSessionId: 'session-1' } })
     await $.session.start({ cwd: '/work/project', surface: 'terminal', isInteractive: true })
     await fake.clock.advance(2_000)

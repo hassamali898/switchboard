@@ -46,8 +46,12 @@ export function bannersSvg(width: number, problems: readonly Problem[], hover: s
     const top = index * rowH
     const isPaused = problem.state === 'paused'
     const tone = problem.state === 'auth' || problem.state === 'error' ? 'red' : 'amber'
-    const label = isPaused ? 'Resume' : 'Fix'
-    const key = isPaused ? `inbox:resume:${problem.source}` : 'inbox:sources'
+    const isPermission = problem.state === 'permission'
+    const label = isPaused ? 'Resume' : isPermission ? 'Allow' : 'Fix'
+    // Each row its own key (one shared key lit every Fix and Sources together): an error checks again,
+    // a refused read asks for the person's OK, sign-in and setup open Sources.
+    const key = isPaused ? `inbox:resume:${problem.source}` : isPermission ? `inbox:allow:${problem.source}`
+      : problem.state === 'error' ? `inbox:recheck:${problem.source}` : `inbox:fix:${problem.source}`
     const w = textWidth(label, 14, true) + 26
     parts.push({ key, leftPx: width - w - 8, widthPx: w, topPx: top + 7, heightPx: 32 })
     const name = SOURCE_NAME[problem.source as keyof typeof SOURCE_NAME] ?? problem.source

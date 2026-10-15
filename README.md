@@ -1,6 +1,6 @@
 # Switchboard `beta`
 
-[Website](https://hassamali898.github.io/switchboard/) · [Releases](https://github.com/hassamali898/switchboard/releases) · MIT ([notices](THIRD_PARTY_NOTICES.md))
+[Website](https://hassamali898.github.io/switchboard/) · [Releases](https://github.com/hassamali898/switchboard/releases) · MIT
 
 ![Switchboard](docs/poster.jpg)
 

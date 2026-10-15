@@ -1,0 +1,8 @@
+{
+  "name": "switchboard",
+  "owner": { "name": "hassamali898" },
+  "metadata": { "description": "Switchboard: separate Claude Code features in one plugin." },
+  "plugins": [
+    { "name": "switchboard", "source": "./", "description": "Files, Replay, Blast Radius, Agents, Reflect, Cache Tax and an Inbox for Claude Code." }
+  ]
+}

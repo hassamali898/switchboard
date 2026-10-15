@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Auto mode in the chat</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#C96442}a:hover{color:#D97757}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes grow{from{width:18%}to{width:86%}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.fade{opacity:0;animation:fadeUp .35s ease-out forwards}
+.pulse{animation:pulse 1.6s ease-in-out infinite}
+.grow{display:block;height:100%;animation:grow 14s ease-out forwards}
+.spin{display:inline-block;animation:spin 1.2s linear infinite}
+.ib:hover{filter:brightness(0.96)}
+@media (prefers-reduced-motion: reduce){*{animation-duration:.01ms !important;animation-delay:0s !important;animation-iteration-count:1 !important}}
+</style>
+</helmet>
+<div style="width: 1440px; height: 900px; box-sizing: border-box; padding: 24px 28px; display: flex; flex-direction: column; gap: 14px; background: {{T.page}}; color: {{T.ink}}; font-family: 'Anthropic Sans', system-ui, -apple-system, 'Segoe UI', sans-serif">
+<div style="display: flex; align-items: center; gap: 12px">
+<span style="font-family: 'Anthropic Serif', Georgia, 'Times New Roman', serif; font-size: 24px; font-weight: 500">Auto mode, in the chat</span>
+<span style="font-size: 13px; color: {{T.faint}}">Set rules by typing · see what runs live</span>
+<button type="button" onClick="{{toggleTheme}}" class="ib" style="margin-left: auto; min-height: 36px; display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; border: 0.5px solid {{T.line2}}; background: {{T.win}}; color: {{T.ink}}; font: inherit; font-size: 13px; cursor: pointer"><svg width="15" height="15" viewBox="0 0 24 24" style="fill: none; stroke: {{T.ink}}; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round"><path d="{{themeIcon}}"></path></svg>{{themeLabel}}</button>
+</div>
+<div style="flex: 1; min-height: 0; display: flex; flex-direction: column; border-radius: 14px; overflow: hidden; border: 0.5px solid {{T.line2}}; background: {{T.win}}; box-shadow: {{T.shadow}}">
+<div style="height: 42px; flex: none; display: flex; align-items: center; gap: 8px; padding: 0 16px; border-bottom: 0.5px solid {{T.line}}; background: {{T.side}}">
+<span style="width: 11px; height: 11px; border-radius: 50%; background: #FF5F57"></span><span style="width: 11px; height: 11px; border-radius: 50%; background: #FEBC2E"></span><span style="width: 11px; height: 11px; border-radius: 50%; background: #28C840"></span>
+<span style="margin: 0 auto; display: flex; padding: 3px; border-radius: 8px; background: {{T.hover}}; font-size: 12.5px"><span style="padding: 4px 14px; color: {{T.faint}}">Chat</span><span style="padding: 4px 14px; color: {{T.faint}}">Cowork</span><span style="padding: 4px 14px; border-radius: 6px; background: {{T.win}}; color: {{T.ink}}">Code</span></span>
+<span style="width: 64px"></span>
+</div>
+<div style="flex: 1; min-height: 0; display: flex">
+<main style="flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; padding: 24px 32px 18px; box-sizing: border-box; gap: 14px; overflow: hidden">
+<div style="width: 100%; max-width: 640px; display: flex; flex-direction: column; gap: 14px">
+<div style="align-self: flex-end; max-width: 86%; padding: 10px 14px; border-radius: 14px; background: {{T.hover}}; font-size: 14px; line-height: 1.5"><span style="font-family: 'Anthropic Mono', 'JetBrains Mono', monospace; color: {{T.clay}}">/auto</span> Ahmed Raza: if he asks for a PR review, review it and post comments. If he asks to meet, book 30 min after 2pm.</div>
+<div style="display: flex; gap: 10px; align-items: flex-start">
+<span style="width: 26px; height: 26px; flex: none; display: grid; place-items: center; color: {{T.clay}}; font-size: 20px">✻</span>
+<div style="flex: 1; display: flex; flex-direction: column; gap: 10px">
+<span style="font-size: 14px">Here’s the rule for Ahmed. Pick a mode and save.</span>
+<div class="fade" style="border-radius: 14px; border: 0.5px solid {{cardBd}}; background: {{T.card}}; overflow: hidden">
+<div style="display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 0.5px solid {{T.line}}">
+<span style="width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: #6A9BCC; color: #FFFFFF; font-size: 12px; font-weight: 600">AR</span>
+<span style="display: flex; flex-direction: column"><span style="font-size: 14px; font-weight: 600">Ahmed Raza</span><span style="font-size: 12px; color: {{T.faint}}">Slack and Gmail</span></span>
+<span style="margin-left: auto; display: flex; padding: 3px; border-radius: 9px; background: {{T.hover}}"><sc-for list="{{modes}}" as="m" hint-placeholder-count="2"><button type="button" onClick="{{m.pick}}" style="min-height: 30px; padding: 4px 12px; border-radius: 7px; border: none; background: {{m.bg}}; color: {{m.fg}}; font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer">{{m.t}}</button></sc-for></span>
+</div>
+<div style="padding: 12px 14px; display: flex; flex-direction: column; gap: 8px">
+<sc-for list="{{pairs}}" as="p" hint-placeholder-count="2">
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 24px minmax(0, 1fr); align-items: center; gap: 8px">
+<span style="display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 10px; background: {{T.hover}}; font-size: 13px"><svg width="15" height="15" viewBox="0 0 24 24" style="flex: none; fill: none; stroke: {{T.muted}}; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="{{p.wp}}"></path></svg>{{p.when}}</span>
+<svg width="20" height="20" viewBox="0 0 24 24" style="fill: none; stroke: {{T.faint}}; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+<span style="display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 10px; background: {{p.bg}}; font-size: 13px; font-weight: 600"><svg width="15" height="15" viewBox="0 0 24 24" style="flex: none; fill: none; stroke: {{p.c}}; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="{{p.dp}}"></path></svg>{{p.do}}</span>
+</div>
+</sc-for>
+<div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 2px"><span style="font-size: 11.5px; color: {{T.faint}}">Only if</span><span style="font-size: 12px; padding: 3px 9px; border-radius: 999px; border: 0.5px solid {{T.line2}}">repo acme-*</span><span style="font-size: 12px; padding: 3px 9px; border-radius: 999px; border: 0.5px solid {{T.line2}}">work hours</span><span style="font-size: 12px; padding: 3px 9px; border-radius: 999px; border: 0.5px solid {{T.line2}}">max 5 / day</span></div>
+</div>
+<div style="display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-top: 0.5px solid {{T.line}}; background: {{T.panel}}">
+<sc-if value="{{saved}}" hint-placeholder-val="{{false}}"><span class="fade" style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: {{T.ok}}"><svg width="15" height="15" viewBox="0 0 24 24" style="fill: none; stroke: {{T.ok}}; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round"><path d="{{I.check}}"></path></svg>Rule active · {{modeName}}</span></sc-if>
+<sc-if value="{{unsaved}}" hint-placeholder-val="{{true}}"><button type="button" onClick="{{save}}" class="ib" style="min-height: 34px; padding: 6px 16px; border-radius: 8px; border: none; background: {{T.btn}}; color: #FFFFFF; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer">Save rule</button><button type="button" class="ib" style="min-height: 34px; padding: 6px 14px; border-radius: 8px; border: 0.5px solid {{T.line2}}; background: transparent; color: {{T.ink}}; font: inherit; font-size: 13px; cursor: pointer">Edit</button></sc-if>
+<span style="margin-left: auto; font-size: 12px; color: {{T.faint}}">Message text never becomes a command</span>
+</div>
+</div>
+</div>
+</div>
+<sc-for list="{{tasks}}" as="k" hint-placeholder-count="3">
+<div class="fade" style="animation-delay: {{k.d}}ms; display: flex; gap: 10px; align-items: center; padding: 10px 12px; border-radius: 12px; border: 0.5px solid {{k.bd}}; background: {{k.bg}}">
+<span style="width: 32px; height: 32px; border-radius: 9px; flex: none; display: grid; place-items: center; background: {{k.sbg}}"><svg width="16" height="16" viewBox="0 0 24 24" style="fill: none; stroke: {{k.sc}}; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="{{k.path}}"></path></svg></span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px">
+<span style="display: flex; align-items: center; gap: 6px; font-size: 13.5px"><svg width="12" height="12" viewBox="0 0 24 24" style="fill: none; stroke: {{T.clay}}; stroke-width: 2.4; stroke-linejoin: round"><path d="{{I.bolt}}"></path></svg><span style="font-weight: 600">{{k.title}}</span><span style="color: {{T.faint}}; font-size: 12px">{{k.rule}}</span></span>
+<sc-if value="{{k.running}}" hint-placeholder-val="{{false}}"><span style="display: flex; align-items: center; gap: 8px"><span style="flex: 1; height: 4px; border-radius: 2px; overflow: hidden; background: {{T.line}}; display: block"><span class="grow" style="background: {{T.clay}}"></span></span><span style="font-size: 12px; color: {{T.faint}}">{{k.sub}}</span></span></sc-if>
+<sc-if value="{{k.still}}" hint-placeholder-val="{{true}}"><span style="font-size: 12.5px; color: {{T.muted}}">{{k.sub}}</span></sc-if>
+</span>
+<span style="flex: none; font-size: 11.5px; font-weight: 600; padding: 3px 9px; border-radius: 999px; color: {{k.stc}}; background: {{k.stbg}}">{{k.status}}</span>
+<sc-if value="{{k.hasBtn}}" hint-placeholder-val="{{true}}"><button type="button" class="ib" style="flex: none; min-height: 30px; padding: 4px 12px; border-radius: 8px; border: 0.5px solid {{k.bbd}}; background: {{k.bbg}}; color: {{k.bfg}}; font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer">{{k.btn}}</button></sc-if>
+</div>
+</sc-for>
+</div>
+<div style="margin-top: auto; width: 100%; max-width: 640px; display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 7px 12px; border-radius: 10px; background: {{T.sel}}; font-size: 12.5px"><svg width="13" height="13" viewBox="0 0 24 24" style="fill: none; stroke: {{T.clay}}; stroke-width: 2.2; stroke-linejoin: round"><path d="{{I.bolt}}"></path></svg><span style="font-weight: 600; color: {{T.clay}}">Auto</span><span class="pulse" style="color: {{T.ink}}">● 1 running</span><span>1 waiting</span><span style="color: {{T.muted}}">{{rulesCount}} rules on</span><button type="button" onClick="{{togglePause}}" style="margin-left: auto; min-height: 26px; padding: 2px 10px; border-radius: 6px; border: 0.5px solid {{T.line2}}; background: {{T.win}}; color: {{T.ink}}; font: inherit; font-size: 12px; cursor: pointer">{{pauseLabel}}</button></div>
+<div style="box-sizing: border-box; padding: 12px 12px 12px 16px; border-radius: 16px; border: 0.5px solid {{T.line2}}; background: {{T.card}}; display: flex; align-items: center; gap: 8px; box-shadow: {{T.shadow}}"><span style="flex: 1; font-size: 14px; color: {{T.faint}}">Type <span style="font-family: 'Anthropic Mono', monospace; color: {{T.clay}}">/auto</span> @person and say what to do…</span><span style="font-size: 12px; padding: 3px 8px; border-radius: 6px; background: {{T.hover}}; color: {{T.muted}}">/rules</span><span style="font-size: 12px; padding: 3px 8px; border-radius: 6px; background: {{T.hover}}; color: {{T.muted}}">/pause</span><span style="width: 32px; height: 32px; border-radius: 9px; display: grid; place-items: center; background: {{T.clay}}"><svg width="16" height="16" viewBox="0 0 24 24" style="fill: none; stroke: #FFFFFF; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round"><path d="{{I.send}}"></path></svg></span></div>
+</div>
+</main>
+<section style="width: 400px; flex: none; box-sizing: border-box; padding: 16px; display: flex; flex-direction: column; gap: 14px; border-left: 0.5px solid {{T.line}}; background: {{T.panel}}; overflow: hidden">
+<div style="display: flex; align-items: center; gap: 8px"><span style="font-family: 'Anthropic Serif', Georgia, serif; font-size: 20px; font-weight: 500">Auto mode</span><button type="button" onClick="{{togglePause}}" aria-label="Auto mode on or off" style="margin-left: auto; width: 44px; height: 26px; border-radius: 999px; border: none; padding: 3px; background: {{swBg}}; display: flex; justify-content: {{swJust}}; cursor: pointer"><span style="width: 20px; height: 20px; border-radius: 50%; background: #FFFFFF; display: block"></span></button></div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+<div style="padding: 10px; border-radius: 10px; background: {{T.card}}; border: 0.5px solid {{T.line}}"><div style="font-family: 'Anthropic Serif', Georgia, serif; font-size: 24px">14</div><div style="font-size: 11.5px; color: {{T.faint}}">done today</div></div>
+<div style="padding: 10px; border-radius: 10px; background: {{T.card}}; border: 0.5px solid {{T.line}}"><div style="font-family: 'Anthropic Serif', Georgia, serif; font-size: 24px; color: {{T.clay}}">1</div><div style="font-size: 11.5px; color: {{T.faint}}">running</div></div>
+<div style="padding: 10px; border-radius: 10px; background: {{T.card}}; border: 0.5px solid {{T.line}}"><div style="font-family: 'Anthropic Serif', Georgia, serif; font-size: 24px">1</div><div style="font-size: 11.5px; color: {{T.faint}}">waiting</div></div>
+</div>
+<div style="font-size: 11.5px; color: {{T.faint}}">People</div>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<sc-for list="{{people}}" as="pp" hint-placeholder-count="4">
+<div class="{{pp.cls}}" style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; background: {{T.card}}; border: 0.5px solid {{pp.bd}}">
+<span style="width: 30px; height: 30px; border-radius: 50%; flex: none; display: grid; place-items: center; background: {{pp.av}}; color: #FFFFFF; font-size: 11px; font-weight: 600">{{pp.ini}}</span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px"><span style="font-size: 13px; font-weight: 600">{{pp.name}}</span><span style="display: flex; gap: 4px"><sc-for list="{{pp.icons}}" as="ic" hint-placeholder-count="2"><span style="width: 20px; height: 20px; border-radius: 5px; display: grid; place-items: center; background: {{ic.bg}}"><svg width="11" height="11" viewBox="0 0 24 24" style="fill: none; stroke: {{ic.c}}; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round"><path d="{{ic.path}}"></path></svg></span></sc-for></span></span>
+<span style="font-size: 11.5px; font-weight: 600; padding: 3px 9px; border-radius: 999px; color: {{pp.mc}}; background: {{pp.mbg}}">{{pp.mode}}</span>
+</div>
+</sc-for>
+</div>
+<div style="font-size: 11.5px; color: {{T.faint}}">General rules</div>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<sc-for list="{{rules}}" as="r" hint-placeholder-count="4">
+<div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; border: 0.5px solid {{T.line}}">
+<span style="width: 26px; height: 26px; border-radius: 7px; flex: none; display: grid; place-items: center; background: {{r.bg}}"><svg width="13" height="13" viewBox="0 0 24 24" style="fill: none; stroke: {{r.c}}; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round"><path d="{{r.path}}"></path></svg></span>
+<span style="flex: 1; font-size: 13px">{{r.name}}</span>
+<span style="font-size: 11.5px; font-weight: 600; padding: 3px 9px; border-radius: 999px; color: {{r.mc}}; background: {{r.mbg}}">{{r.mode}}</span>
+</div>
+</sc-for>
+</div>
+<div style="margin-top: auto; display: flex; flex-direction: column; gap: 6px"><div style="font-size: 11.5px; color: {{T.faint}}">Auto actions, last 12 hours</div><div style="display: flex; align-items: flex-end; gap: 4px; height: 44px"><sc-for list="{{bars}}" as="b" hint-placeholder-count="12"><span style="flex: 1; border-radius: 3px 3px 0 0; height: {{b.h}}px; background: {{b.c}}"></span></sc-for></div></div>
+</section>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"$preview":{"width":1440,"height":900}}'>
+const I = {
+  slack: 'M5 9h14M5 15h14M10 4L8 20M16 4l-2 16', gmail: 'M3 6h18v12H3zM3 7l9 6 9-6', cal: 'M4 5h16v15H4zM4 10h16M8 3v4M16 3v4',
+  github: 'M6 4v10M8 18a2 2 0 1 1-4 0a2 2 0 1 1 4 0M20 6a2 2 0 1 1-4 0a2 2 0 1 1 4 0M18 8v4a4 4 0 0 1-4 4h-4', jira: 'M4 4h16v16H4zM8 12l3 3 5-6',
+  bolt: 'M13 2L4 14h7l-1 8 9-12h-7z', send: 'M12 19V5M5 12l7-7 7 7', check: 'M5 12l5 5 9-10', comment: 'M4 5h16v11H9l-5 4z', archive: 'M3 4h18v4H3zM5 8v12h14V8M10 12h4',
+  sun: 'M12 16a4 4 0 1 0 0-8a4 4 0 0 0 0 8M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5', moon: 'M20 14A8 8 0 1 1 10 4a6 6 0 0 0 10 10z', meet: 'M12 12a4 4 0 1 0 0-8a4 4 0 0 0 0 8M4 21a8 8 0 0 1 16 0'
+};
+const TH = {
+  light: { page: '#FAF9F5', win: '#FFFFFF', side: '#F5F4ED', panel: '#FAF9F5', card: '#FFFFFF', ink: '#141413', muted: '#5E5D59', faint: '#87867F', line: 'rgba(31,30,29,0.10)', line2: 'rgba(31,30,29,0.22)', hover: 'rgba(115,114,108,0.10)', sel: 'rgba(217,119,87,0.12)', selBd: 'rgba(201,100,66,0.55)', clay: '#C96442', btn: '#C96442', shadow: '0 1px 2px rgba(20,20,19,0.05), 0 10px 30px rgba(20,20,19,0.06)', ok: '#3F7A2E', okBg: 'rgba(85,138,66,0.12)', warn: '#9A5B00', warnBg: 'rgba(201,168,45,0.18)', off: '#87867F', offBg: 'rgba(115,114,108,0.12)', bar: '#E3DACC' },
+  dark: { page: '#1F1E1D', win: '#262624', side: '#1F1E1D', panel: '#262624', card: '#30302E', ink: '#FAF9F5', muted: '#C2C0B6', faint: '#9C9A92', line: 'rgba(222,220,209,0.10)', line2: 'rgba(222,220,209,0.22)', hover: 'rgba(222,220,209,0.07)', sel: 'rgba(217,119,87,0.16)', selBd: 'rgba(217,119,87,0.6)', clay: '#E08A6B', btn: '#C96442', shadow: '0 1px 2px rgba(0,0,0,0.3), 0 10px 30px rgba(0,0,0,0.3)', ok: '#9CCB86', okBg: 'rgba(85,138,66,0.22)', warn: '#F2CC5C', warnBg: 'rgba(201,168,45,0.18)', off: '#9C9A92', offBg: 'rgba(222,220,209,0.08)', bar: '#4D4C48' }
+};
+const SC = {
+  light: { slack: ['#611F69', 'rgba(97,31,105,0.10)'], gmail: ['#C5221F', 'rgba(234,67,53,0.10)'], cal: ['#9A5B00', 'rgba(249,171,0,0.16)'], github: ['#24292F', 'rgba(36,41,47,0.08)'], jira: ['#0052CC', 'rgba(0,82,204,0.10)'] },
+  dark: { slack: ['#E2A9EA', 'rgba(226,169,234,0.14)'], gmail: ['#FF8A7E', 'rgba(234,67,53,0.18)'], cal: ['#FBC02D', 'rgba(249,171,0,0.14)'], github: ['#E6EDF3', 'rgba(230,237,243,0.10)'], jira: ['#8DB8FF', 'rgba(0,82,204,0.30)'] }
+};
+class Component extends DCLogic {
+  state = { dark: null, mode: 'auto', saved: false, paused: false };
+  isDark() { return this.state.dark === null ? (this.props.theme ?? 'light') === 'dark' : this.state.dark; }
+  renderVals() {
+    const st = this.state, md = this.isDark() ? 'dark' : 'light', T = TH[md], S = SC[md];
+    const M = { ask: { t: 'Ask first', c: T.warn, bg: T.warnBg }, auto: { t: 'Auto', c: T.clay, bg: T.sel }, off: { t: 'Paused', c: T.off, bg: T.offBg } };
+    const eff = m => st.paused ? 'off' : m;
+    const modes = ['ask', 'auto'].map(m => ({ t: M[m].t, bg: st.mode === m ? T.card : 'transparent', fg: st.mode === m ? (m === 'auto' ? T.clay : T.warn) : T.faint, pick: () => this.setState({ mode: m }) }));
+    const pairs = [
+      { wp: I.comment, when: 'Asks for a PR review', dp: I.github, do: 'Review and post comments', c: S.github[0], bg: S.github[1] },
+      { wp: I.meet, when: 'Asks to meet', dp: I.cal, do: 'Book 30 min, after 2pm', c: S.cal[0], bg: S.cal[1] }
+    ];
+    const st3 = (s, c, bg) => ({ status: s, stc: c, stbg: bg });
+    const tasks = [
+      Object.assign({ d: 300, path: I.github, sc: S.github[0], sbg: S.github[1], title: 'Reviewing acme-api #482', rule: 'Review PRs', sub: '4 of 14 files', running: true, still: false, hasBtn: true, btn: 'Stop', bbg: 'transparent', bbd: T.line2, bfg: T.ink, bd: T.selBd, bg: T.card }, st3('Running', T.clay, T.sel)),
+      Object.assign({ d: 600, path: I.gmail, sc: S.gmail[0], sbg: S.gmail[1], title: 'Reply to Sara Khan', rule: 'Replies · Ask first', sub: '“Will do, I’ll add them by Wednesday.”', running: false, still: true, hasBtn: true, btn: 'Approve', bbg: T.btn, bbd: T.btn, bfg: '#FFFFFF', bd: T.line2, bg: T.card }, st3('Waiting', T.warn, T.warnBg)),
+      Object.assign({ d: 900, path: I.cal, sc: S.cal[0], sbg: S.cal[1], title: 'Booked Thu 11:30 with Bilal', rule: 'Book meetings', sub: 'Invite sent, replied in Slack', running: false, still: true, hasBtn: true, btn: 'Undo', bbg: 'transparent', bbd: T.line2, bfg: T.ink, bd: T.line, bg: 'transparent' }, st3('Done', T.ok, T.okBg))
+    ];
+    const P = (n, ini, av, icons, m, isNew) => ({ name: n, ini: ini, av: av, icons: icons.map(k => ({ path: I[k], c: S[k][0], bg: S[k][1] })), mode: M[eff(m)].t, mc: M[eff(m)].c, mbg: M[eff(m)].bg, bd: isNew ? T.selBd : T.line, cls: isNew ? 'fade' : '' });
+    const people = [];
+    if (st.saved) people.push(P('Ahmed Raza', 'AR', '#6A9BCC', ['github', 'cal'], st.mode, true));
+    people.push(P('Bilal Ahmed', 'BA', '#788C5D', ['cal'], 'auto', false));
+    people.push(P('Sara Khan', 'SK', '#C46686', ['gmail'], 'ask', false));
+    const R = (n, k, m) => ({ name: n, path: I[k], c: S[k][0], bg: S[k][1], mode: M[eff(m)].t, mc: M[eff(m)].c, mbg: M[eff(m)].bg });
+    const rules = [R('Review PRs', 'github', 'ask'), R('Book meetings', 'cal', 'auto'), R('Not important', 'gmail', 'auto'), R('Jira assigned', 'jira', 'ask')];
+    const hs = [8, 14, 6, 20, 26, 12, 30, 18, 10, 24, 34, 16];
+    const bars = hs.map((h, i) => ({ h: h, c: i === hs.length - 1 ? T.clay : T.bar }));
+    return {
+      T: T, I: I, modes: modes, pairs: pairs, tasks: tasks, people: people, rules: rules, bars: bars,
+      saved: st.saved, unsaved: !st.saved, modeName: M[st.mode].t, cardBd: st.saved ? T.selBd : T.line2,
+      save: () => this.setState({ saved: true }),
+      rulesCount: st.saved ? 7 : 6,
+      pauseLabel: st.paused ? 'Resume all' : 'Pause all',
+      togglePause: () => this.setState({ paused: !st.paused }),
+      swBg: st.paused ? T.line2 : T.clay, swJust: st.paused ? 'flex-start' : 'flex-end',
+      themeIcon: md === 'dark' ? I.sun : I.moon, themeLabel: md === 'dark' ? 'Light' : 'Dark',
+      toggleTheme: () => this.setState({ dark: md !== 'dark' })
+    };
+  }
+}
+</script>
+</body>
+</html>

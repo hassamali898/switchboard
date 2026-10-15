@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sources and priorities</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#C96442}a:hover{color:#D97757}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes popIn{0%{opacity:0;transform:scale(.85)}70%{opacity:1;transform:scale(1.04)}100%{opacity:1;transform:none}}
+.pulse{animation:pulse 1.6s ease-in-out infinite}
+.chip{animation:popIn .3s ease-out}
+.ib:hover{filter:brightness(0.96)}
+@media (prefers-reduced-motion: reduce){*{animation-duration:.01ms !important;animation-iteration-count:1 !important}}
+</style>
+</helmet>
+<div style="width: 1440px; height: 900px; box-sizing: border-box; padding: 24px 28px; display: flex; flex-direction: column; gap: 14px; background: {{T.page}}; color: {{T.ink}}; font-family: 'Anthropic Sans', system-ui, -apple-system, 'Segoe UI', sans-serif">
+<div style="display: flex; align-items: center; gap: 12px">
+<span style="font-family: 'Anthropic Serif', Georgia, 'Times New Roman', serif; font-size: 24px; font-weight: 500">Sources and priorities</span>
+<span style="font-size: 13px; color: {{T.faint}}">Click a chip to move it to the next level</span>
+<button type="button" onClick="{{toggleTheme}}" class="ib" style="margin-left: auto; min-height: 36px; display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; border: 0.5px solid {{T.line2}}; background: {{T.win}}; color: {{T.ink}}; font: inherit; font-size: 13px; cursor: pointer"><svg width="15" height="15" viewBox="0 0 24 24" style="fill: none; stroke: {{T.ink}}; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round"><path d="{{themeIcon}}"></path></svg>{{themeLabel}}</button>
+</div>
+<div style="flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 18px; padding: 22px 24px; box-sizing: border-box; border-radius: 14px; border: 0.5px solid {{T.line2}}; background: {{T.win}}; box-shadow: {{T.shadow}}">
+<div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px">
+<sc-for list="{{sources}}" as="s" hint-placeholder-count="5">
+<div style="display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 14px; border: 0.5px solid {{T.line2}}; background: {{T.card}}; opacity: {{s.op}}">
+<div style="display: flex; align-items: center; justify-content: space-between"><span style="width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: {{s.bg}}"><svg width="22" height="22" viewBox="0 0 24 24" style="fill: none; stroke: {{s.c}}; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="{{s.path}}"></path></svg></span><button type="button" onClick="{{s.toggle}}" aria-label="{{s.aria}}" style="width: 40px; height: 24px; border-radius: 999px; border: none; padding: 3px; background: {{s.tbg}}; display: flex; justify-content: {{s.tj}}; cursor: pointer"><span style="width: 18px; height: 18px; border-radius: 50%; background: #FFFFFF; display: block"></span></button></div>
+<div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; font-weight: 600">{{s.name}}</span><span style="display: flex; align-items: center; gap: 5px; font-size: 12px; color: {{T.faint}}"><span class="{{s.cls}}" style="width: 7px; height: 7px; border-radius: 50%; background: {{s.dot}}"></span>{{s.status}}</span></div>
+</div>
+</sc-for>
+<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 14px; border-radius: 14px; border: 1px dashed {{T.line2}}; color: {{T.muted}}"><svg width="22" height="22" viewBox="0 0 24 24" style="fill: none; stroke: {{T.clay}}; stroke-width: 2; stroke-linecap: round"><path d="M12 5v14M5 12h14"></path></svg><span style="font-size: 13px">Add source</span><span style="font-size: 11.5px; color: {{T.faint}}">Linear · Notion · Sentry</span></div>
+</div>
+<div style="flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px">
+<sc-for list="{{cols}}" as="c" hint-placeholder-count="4">
+<div style="display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 14px; background: {{T.panel}}; border: 0.5px solid {{T.line}}; border-top: 3px solid {{c.c}}">
+<div style="display: flex; align-items: center; gap: 8px"><span style="font-family: 'Anthropic Serif', Georgia, serif; font-size: 20px; font-weight: 500">{{c.name}}</span><span style="margin-left: auto; font-size: 12px; color: {{T.faint}}">{{c.count}}</span></div>
+<div style="display: flex; gap: 6px; flex-wrap: wrap"><sc-for list="{{c.fx}}" as="x" hint-placeholder-count="2"><span style="display: flex; align-items: center; gap: 4px; font-size: 11.5px; padding: 3px 8px; border-radius: 999px; background: {{c.bg}}; color: {{c.c}}; font-weight: 600"><svg width="11" height="11" viewBox="0 0 24 24" style="fill: none; stroke: {{c.c}}; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round"><path d="{{x.path}}"></path></svg>{{x.t}}</span></sc-for></div>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<sc-for list="{{c.chips}}" as="h" hint-placeholder-count="4"><button type="button" onClick="{{h.move}}" class="chip ib" style="display: flex; align-items: center; gap: 8px; width: 100%; box-sizing: border-box; min-height: 40px; padding: 7px 10px; border-radius: 10px; border: 0.5px solid {{T.line2}}; background: {{T.card}}; color: {{T.ink}}; font: inherit; font-size: 13px; cursor: pointer; text-align: left"><span style="width: 24px; height: 24px; border-radius: 6px; flex: none; display: grid; place-items: center; background: {{h.bg}}"><svg width="13" height="13" viewBox="0 0 24 24" style="fill: none; stroke: {{h.c}}; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round"><path d="{{h.path}}"></path></svg></span><span style="flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{h.t}}</span><span style="color: {{T.faint}}; font-size: 13px">→</span></button></sc-for>
+<span style="display: flex; align-items: center; justify-content: center; min-height: 36px; border-radius: 10px; border: 1px dashed {{T.line2}}; font-size: 12.5px; color: {{T.faint}}">+ Add</span>
+</div>
+</div>
+</sc-for>
+</div>
+<div style="display: flex; gap: 12px; align-items: stretch">
+<div style="flex: 1; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; border: 0.5px solid {{T.line}}; background: {{T.panel}}"><span style="font-size: 18px">🔔</span><span style="font-size: 13.5px; font-weight: 600">Meeting popup</span><span style="margin-left: auto; display: flex; padding: 3px; border-radius: 9px; background: {{T.hover}}"><sc-for list="{{leads}}" as="l" hint-placeholder-count="4"><button type="button" onClick="{{l.pick}}" style="min-height: 30px; padding: 4px 12px; border-radius: 7px; border: none; background: {{l.bg}}; color: {{l.fg}}; font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer">{{l.t}}</button></sc-for></span></div>
+<div style="flex: 1; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; border: 0.5px solid {{T.line}}; background: {{T.panel}}"><span style="font-size: 18px">🎯</span><span style="font-size: 13.5px; font-weight: 600">Focus</span><span style="font-size: 12.5px; color: {{T.faint}}">{{focusText}}</span><button type="button" onClick="{{toggleFocus}}" aria-label="Focus on or off" style="margin-left: auto; width: 40px; height: 24px; border-radius: 999px; border: none; padding: 3px; background: {{focusBg}}; display: flex; justify-content: {{focusJ}}; cursor: pointer"><span style="width: 18px; height: 18px; border-radius: 50%; background: #FFFFFF; display: block"></span></button></div>
+<div style="flex: 1; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; border: 0.5px solid {{T.line}}; background: {{T.panel}}"><span style="font-size: 18px">🌙</span><span style="font-size: 13.5px; font-weight: 600">Quiet hours</span><span style="margin-left: auto; font-size: 13px; padding: 5px 10px; border-radius: 8px; background: {{T.hover}}">20:00 to 09:00</span></div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"$preview":{"width":1440,"height":900}}'>
+const I = {
+  slack: 'M5 9h14M5 15h14M10 4L8 20M16 4l-2 16', gmail: 'M3 6h18v12H3zM3 7l9 6 9-6', cal: 'M4 5h16v15H4zM4 10h16M8 3v4M16 3v4',
+  github: 'M6 4v10M8 18a2 2 0 1 1-4 0a2 2 0 1 1 4 0M20 6a2 2 0 1 1-4 0a2 2 0 1 1 4 0M18 8v4a4 4 0 0 1-4 4h-4', jira: 'M4 4h16v16H4zM8 12l3 3 5-6',
+  user: 'M12 12a4 4 0 1 0 0-8a4 4 0 0 0 0 8M4 21a8 8 0 0 1 16 0', key: 'M4 7h16M4 12h10M4 17h7',
+  win: 'M3 5h18v14H3zM3 9h18', desk: 'M3 4h18v12H3zM8 20h8M12 16v4', sound: 'M4 9h4l5-4v14l-5-4H4zM17 9a4 4 0 0 1 0 6', toast: 'M4 14h16v6H4z', badge: 'M12 16a4 4 0 1 0 0-8a4 4 0 0 0 0 8',
+  sun: 'M12 16a4 4 0 1 0 0-8a4 4 0 0 0 0 8M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5', moon: 'M20 14A8 8 0 1 1 10 4a6 6 0 0 0 10 10z'
+};
+const TH = {
+  light: { page: '#FAF9F5', win: '#FFFFFF', panel: '#FAF9F5', card: '#FFFFFF', ink: '#141413', muted: '#5E5D59', faint: '#87867F', line: 'rgba(31,30,29,0.10)', line2: 'rgba(31,30,29,0.22)', hover: 'rgba(115,114,108,0.10)', clay: '#C96442', shadow: '0 1px 2px rgba(20,20,19,0.05), 0 10px 30px rgba(20,20,19,0.06)', ok: '#558A42', off: '#D1CFC5',
+    lv: { crit: ['#B42318', 'rgba(180,35,24,0.10)'], high: ['#9A5B00', 'rgba(201,168,45,0.18)'], norm: ['#5E5D59', 'rgba(115,114,108,0.12)'], quiet: ['#87867F', 'rgba(115,114,108,0.08)'] },
+    sc: { slack: ['#611F69', 'rgba(97,31,105,0.10)'], gmail: ['#C5221F', 'rgba(234,67,53,0.10)'], cal: ['#9A5B00', 'rgba(249,171,0,0.16)'], github: ['#24292F', 'rgba(36,41,47,0.08)'], jira: ['#0052CC', 'rgba(0,82,204,0.10)'], user: ['#C96442', 'rgba(217,119,87,0.12)'], key: ['#5E5D59', 'rgba(115,114,108,0.12)'] } },
+  dark: { page: '#1F1E1D', win: '#262624', panel: '#1F1E1D', card: '#30302E', ink: '#FAF9F5', muted: '#C2C0B6', faint: '#9C9A92', line: 'rgba(222,220,209,0.10)', line2: 'rgba(222,220,209,0.22)', hover: 'rgba(222,220,209,0.07)', clay: '#E08A6B', shadow: '0 1px 2px rgba(0,0,0,0.3), 0 10px 30px rgba(0,0,0,0.3)', ok: '#9CCB86', off: '#4D4C48',
+    lv: { crit: ['#F87171', 'rgba(248,113,113,0.14)'], high: ['#F2CC5C', 'rgba(201,168,45,0.18)'], norm: ['#C2C0B6', 'rgba(222,220,209,0.08)'], quiet: ['#9C9A92', 'rgba(222,220,209,0.06)'] },
+    sc: { slack: ['#E2A9EA', 'rgba(226,169,234,0.14)'], gmail: ['#FF8A7E', 'rgba(234,67,53,0.18)'], cal: ['#FBC02D', 'rgba(249,171,0,0.14)'], github: ['#E6EDF3', 'rgba(230,237,243,0.10)'], jira: ['#8DB8FF', 'rgba(0,82,204,0.30)'], user: ['#E08A6B', 'rgba(217,119,87,0.16)'], key: ['#C2C0B6', 'rgba(222,220,209,0.08)'] } }
+};
+const SOURCES = [['slack', 'Slack', 'Live', true], ['gmail', 'Gmail', 'Live', true], ['cal', 'Calendar', 'Sync 60 s', false], ['github', 'GitHub', 'Every 60 s', false], ['jira', 'Jira', 'Every 60 s', false]];
+const ORDER = ['crit', 'high', 'norm', 'quiet'];
+const NAMES = { crit: 'Critical', high: 'High', norm: 'Normal', quiet: 'Quiet' };
+const FX = { crit: [['Popup', 'win'], ['Desktop', 'desk'], ['Sound', 'sound']], high: [['Toast stays', 'toast'], ['Sound', 'sound']], norm: [['Toast 6 s', 'toast']], quiet: [['Badge', 'badge']] };
+const CHIPS = [
+  [1, 'cal', 'All meetings', 'crit'], [2, 'user', 'Bilal Ahmed (lead)', 'crit'], [3, 'slack', '#acme-prod', 'crit'], [4, 'github', 'CI fails on main', 'crit'], [5, 'key', '“urgent”, “prod down”', 'crit'],
+  [6, 'github', 'Review requests', 'high'], [7, 'jira', 'Priority Highest', 'high'], [8, 'gmail', '@client.com', 'high'],
+  [9, 'slack', 'DMs and mentions', 'norm'], [10, 'slack', '#acme-devs', 'norm'], [11, 'gmail', 'Primary inbox', 'norm'], [12, 'jira', 'Ticket comments', 'norm'],
+  [13, 'gmail', 'Newsletters', 'quiet'], [14, 'slack', 'Bot messages', 'quiet'], [15, 'github', 'Dependabot', 'quiet']
+];
+class Component extends DCLogic {
+  state = { dark: null, off: {}, lv: {}, lead: 5, focus: false };
+  isDark() { return this.state.dark === null ? (this.props.theme ?? 'light') === 'dark' : this.state.dark; }
+  renderVals() {
+    const st = this.state, md = this.isDark() ? 'dark' : 'light', T = TH[md];
+    const sources = SOURCES.map(s => { const on = !st.off[s[0]]; return { name: s[1], status: on ? s[2] : 'Paused', path: I[s[0]], c: T.sc[s[0]][0], bg: T.sc[s[0]][1], op: on ? 1 : 0.5, dot: on ? T.ok : T.off, cls: on && s[3] ? 'pulse' : '', tbg: on ? T.clay : T.off, tj: on ? 'flex-end' : 'flex-start', aria: 'Turn ' + s[1] + (on ? ' off' : ' on'), toggle: () => { const off = Object.assign({}, st.off); off[s[0]] = on; this.setState({ off: off }); } }; });
+    const level = ch => st.lv[ch[0]] || ch[3];
+    const cols = ORDER.map(k => {
+      const chips = CHIPS.filter(ch => level(ch) === k).map(ch => ({ t: ch[2], path: I[ch[1]], c: T.sc[ch[1]][0], bg: T.sc[ch[1]][1], move: () => { const lv = Object.assign({}, st.lv); lv[ch[0]] = ORDER[(ORDER.indexOf(level(ch)) + 1) % 4]; this.setState({ lv: lv }); } }));
+      return { name: NAMES[k], c: T.lv[k][0], bg: T.lv[k][1], count: chips.length, chips: chips, fx: FX[k].map(f => ({ t: f[0], path: I[f[1]] })) };
+    });
+    const leads = [1, 3, 5, 10].map(n => ({ t: n + ' min', bg: st.lead === n ? T.card : 'transparent', fg: st.lead === n ? T.clay : T.faint, pick: () => this.setState({ lead: n }) }));
+    return {
+      T: T, sources: sources, cols: cols, leads: leads,
+      focusText: st.focus ? 'only Critical' : 'off', focusBg: st.focus ? T.clay : T.off, focusJ: st.focus ? 'flex-end' : 'flex-start',
+      toggleFocus: () => this.setState({ focus: !st.focus }),
+      themeIcon: md === 'dark' ? I.sun : I.moon, themeLabel: md === 'dark' ? 'Light' : 'Dark',
+      toggleTheme: () => this.setState({ dark: md !== 'dark' })
+    };
+  }
+}
+</script>
+</body>
+</html>

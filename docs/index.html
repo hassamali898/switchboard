@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Switchboard · Claude Code plugin</title>
+<meta name="description" content="Switchboard: one Claude Code plugin for your inbox, safety holds, live files, replay, agents and more. Switch less. Build more.">
+<meta property="og:title" content="Switchboard — Switch less. Build more.">
+<meta property="og:description" content="A Claude Code plugin: Slack, Gmail, Calendar, GitHub and Jira in one inbox, plus Blast Radius, Files, Replay, Agents, Reflect and Cache Tax.">
+<meta property="og:image" content="poster.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FAF9F5;--bg2:#F2EFE6;--card:#FFFFFF;--ink:#1F1E1D;--muted:#6B6862;--line:#E5E1D6;
+  --clay:#C96442;--clay2:#D97757;--claySoft:#F6E3DA;--teal:#2B7A72;--tealSoft:#DCEFEC;--amber:#A86A12;--rose:#B2456E;
+  --shadow:0 1px 2px rgba(31,30,29,.04),0 12px 40px -12px rgba(31,30,29,.14);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#262624;--bg2:#1F1E1D;--card:#30302E;--ink:#F5F4EE;--muted:#A8A49B;--line:#3D3C39;
+  --clay:#D97757;--clay2:#E8896A;--claySoft:#3A2C26;--teal:#5FB3A8;--tealSoft:#22332F;--amber:#E0A44A;--rose:#E07AA0;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 18px 50px -16px rgba(0,0,0,.6);
+}}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+.serif{font-family:"Source Serif 4",Georgia,serif;font-weight:600;letter-spacing:-.01em}
+code,.mono{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:.88em}
+/* nav */
+nav{position:sticky;top:0;z-index:10;backdrop-filter:blur(14px);background:color-mix(in srgb,var(--bg) 82%,transparent);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;gap:20px;height:62px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-size:19px}
+.logo{width:30px;height:30px;border-radius:9px;background:linear-gradient(145deg,var(--clay2),var(--clay));display:grid;place-items:center;box-shadow:0 4px 12px -4px var(--clay)}
+.links{margin-left:auto;display:flex;gap:22px;font-size:14px;color:var(--muted)}
+.links a{text-decoration:none}.links a:hover{color:var(--ink)}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:99px;background:var(--claySoft);color:var(--clay)}
+.pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+/* hero */
+.hero{position:relative;padding:72px 0 40px;text-align:center;overflow:hidden}
+.hero:before{content:"";position:absolute;inset:-30% -10% auto;height:620px;background:radial-gradient(40% 50% at 30% 40%,color-mix(in srgb,var(--clay2) 22%,transparent),transparent 70%),radial-gradient(35% 45% at 75% 30%,color-mix(in srgb,var(--teal) 16%,transparent),transparent 70%);z-index:-1}
+h1{font-size:clamp(40px,7vw,76px);line-height:1.04;margin:20px 0 14px}
+h1 em{font-style:normal;color:var(--clay)}
+.lede{font-size:clamp(17px,2.1vw,20px);color:var(--muted);max-width:700px;margin:0 auto 30px}
+.ctas{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:9px;padding:13px 22px;border-radius:12px;font-weight:600;font-size:15px;text-decoration:none;transition:transform .15s,box-shadow .15s}
+.btn:hover{transform:translateY(-1px)}
+.primary{background:var(--clay);color:#fff;box-shadow:0 8px 24px -10px var(--clay)}
+.ghost{border:1.5px solid var(--line);background:var(--card)}
+.meta{margin-top:14px;font-size:13px;color:var(--muted)}
+.video{margin:44px auto 0;max-width:980px;border-radius:20px;padding:8px;background:var(--card);border:1.5px solid color-mix(in srgb,var(--clay) 45%,var(--line));box-shadow:var(--shadow)}
+.video video{display:block;width:100%;border-radius:14px;aspect-ratio:16/9;background:var(--bg2)}
+/* sections */
+section{padding:72px 0}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--clay);display:flex;align-items:center;gap:8px}
+.eyebrow:before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+h2{font-size:clamp(30px,4vw,44px);line-height:1.12;margin:10px 0 12px}
+.sub{color:var(--muted);max-width:640px;margin:0 0 36px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;box-shadow:var(--shadow);transition:transform .2s}
+.card:hover{transform:translateY(-3px)}
+.icon{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;margin-bottom:14px;font-size:20px}
+.card h3{margin:0 0 6px;font-size:18px}
+.card p{margin:0;color:var(--muted);font-size:14.5px}
+.tag{display:inline-block;margin-top:12px;font-size:12px;color:var(--muted)}
+.c1{background:var(--claySoft);color:var(--clay)}.c2{background:var(--tealSoft);color:var(--teal)}
+.c3{background:color-mix(in srgb,var(--amber) 16%,transparent);color:var(--amber)}.c4{background:color-mix(in srgb,var(--rose) 15%,transparent);color:var(--rose)}
+.alt{background:var(--bg2);border-block:1px solid var(--line)}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;counter-reset:s}
+.step{position:relative;padding:22px 22px 22px 66px;background:var(--card);border:1px solid var(--line);border-radius:16px}
+.step:before{counter-increment:s;content:counter(s);position:absolute;left:20px;top:20px;width:30px;height:30px;border-radius:9px;background:var(--clay);color:#fff;display:grid;place-items:center;font-weight:700}
+.step h3{margin:0 0 4px;font-size:17px}.step p{margin:0;color:var(--muted);font-size:14.5px}
+pre{margin:12px 0 0;padding:12px 14px;background:var(--bg2);border:1px solid var(--line);border-radius:10px;overflow-x:auto;font-size:13px}
+.safety{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.safe{display:flex;gap:12px;align-items:flex-start;padding:16px;border-radius:14px;background:var(--card);border:1px solid var(--line)}
+.safe b{display:block;font-size:15px}.safe span{color:var(--muted);font-size:14px}
+.check{flex:none;width:24px;height:24px;border-radius:50%;background:var(--tealSoft);color:var(--teal);display:grid;place-items:center;font-size:13px;font-weight:700}
+.road .card{border-style:dashed}
+.soon{float:right;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--teal);background:var(--tealSoft);padding:3px 8px;border-radius:99px}
+.cta{text-align:center;padding:64px 24px;border-radius:24px;background:linear-gradient(135deg,var(--claySoft),var(--tealSoft));border:1px solid var(--line)}
+footer{padding:36px 0 48px;color:var(--muted);font-size:14px}
+footer .wrap{display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between}
+@media (max-width:640px){.links{display:none}section{padding:52px 0}.hero{padding-top:48px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<nav><div class="wrap">
+  <a class="brand serif" href="#"><span class="logo"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M4 8h10M18 8h2M4 16h2M10 16h10"/><circle cx="16" cy="8" r="2"/><circle cx="8" cy="16" r="2"/></svg></span>Switchboard</a>
+  <span class="pill"><span class="dot"></span>Beta</span>
+  <div class="links"><a href="#features">Features</a><a href="#install">Install</a><a href="#safety">Safety</a><a href="#roadmap">Roadmap</a><a href="https://github.com/hassamali898/switchboard">GitHub</a></div>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+  <span class="pill"><span class="dot"></span>Public beta · v1.0.0-beta.1</span>
+  <h1 class="serif">Switch less. <em>Build more.</em></h1>
+  <p class="lede">One Claude Code plugin that keeps Slack, Gmail, Calendar, GitHub and Jira in one quiet inbox, and adds the safety and visibility tools you wish Claude Code had: holds for risky commands, a live file tree, replay, agents and more.</p>
+  <div class="ctas">
+    <a class="btn primary" href="https://github.com/hassamali898/switchboard/releases/latest"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 21h16"/></svg>Download the beta</a>
+    <a class="btn ghost" href="https://github.com/hassamali898/switchboard"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a11.5 11.5 0 00-3.6 22.4c.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2a11 11 0 015.8 0c2.2-1.5 3.2-1.2 3.2-1.2.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A11.5 11.5 0 0012 .5z"/></svg>View on GitHub</a>
+  </div>
+  <p class="meta">Free and open source (MIT) · Claude Code 2.1.295+ · macOS · runs entirely on your machine</p>
+  <div class="video"><video src="switchboard-promo.mp4" poster="poster.jpg" controls autoplay muted loop playsinline preload="metadata"></video></div>
+</div></header>
+
+<section id="features"><div class="wrap">
+  <div class="eyebrow">Features</div>
+  <h2 class="serif">Eight tools. One switch each.</h2>
+  <p class="sub">Every feature is separate. Turn each on or off from one pane with <code>/sb</code>. Coding sessions stay quiet: only what truly needs you shows up.</p>
+  <div class="grid">
+    <div class="card"><div class="icon c4">✉</div><h3>Inbox</h3><p>Slack, Gmail, Calendar, GitHub and Jira in one color-coded list behind a bell. Three drafted replies, sent with a 10&nbsp;s Undo.</p><span class="tag mono">/sb-inbox</span></div>
+    <div class="card"><div class="icon c1">ϟ</div><h3>Auto rules</h3><p>Rules you write in plain words. Ask first by default; a reply only goes out under a saved rule, to a person you named.</p><span class="tag mono">/sb-auto</span></div>
+    <div class="card"><div class="icon c3">⏰</div><h3>Meeting cards</h3><p>A card before each meeting, one minute before, and at the start, with Join for the call link.</p><span class="tag">Calendar</span></div>
+    <div class="card"><div class="icon c1">⚠</div><h3>Blast Radius</h3><p>Holds <code>rm -rf</code>, <code>git reset --hard</code> and friends, measures what they'd touch, and waits for your call.</p><span class="tag mono">/sb-blast</span></div>
+    <div class="card"><div class="icon c2">▤</div><h3>Files</h3><p>A live tree of what Claude reads, edits and commits, opening by itself while it works.</p><span class="tag mono">/sb-files</span></div>
+    <div class="card"><div class="icon c2">↺</div><h3>Replay</h3><p>Step through every edit of the last turns, with word-level diffs.</p><span class="tag mono">/sb-replay</span></div>
+    <div class="card"><div class="icon c3">◎</div><h3>Agents</h3><p>The subagents Claude runs: progress, model, tokens and cost, live.</p><span class="tag mono">/sb-agents</span></div>
+    <div class="card"><div class="icon c4">✎</div><h3>Reflect &amp; Cache Tax</h3><p>Turns your corrections into CLAUDE.md rules, and holds a costly message when the prompt cache went cold.</p><span class="tag mono">/sb-reflect · /sb-cache</span></div>
+  </div>
+</div></section>
+
+<section id="install" class="alt"><div class="wrap">
+  <div class="eyebrow">Install</div>
+  <h2 class="serif">Up and running in a minute.</h2>
+  <p class="sub">Needs Claude Code 2.1.295 or newer and Python 3.10+. The Python environment builds itself on first use.</p>
+  <div class="steps">
+    <div class="step"><h3>Switch on function hooks</h3><p>In <code>~/.claude/settings.json</code>, under <code>env</code>:</p><pre>"CLAUDE_CODE_ENABLE_FUNCTION_HOOKS": "1"</pre></div>
+    <div class="step"><h3>Install the plugin</h3><p>Inside Claude Code:</p><pre>/plugin marketplace add hassamali898/switchboard
+/plugin install switchboard@switchboard</pre></div>
+    <div class="step"><h3>Open the hub</h3><p>Start a new session and open Switchboard. Make one session your Inbox:</p><pre>/sb
+/sb-inbox here</pre></div>
+  </div>
+</div></section>
+
+<section id="safety"><div class="wrap">
+  <div class="eyebrow">Safety first</div>
+  <h2 class="serif">Built to never surprise you.</h2>
+  <p class="sub">Your accounts are sensitive. Every write goes through one guarded path, and message text is always treated as data, never as instructions.</p>
+  <div class="safety">
+    <div class="safe"><span class="check">✓</span><div><b>Nothing sends by itself</b><span>Manual sends need a click; auto sends need a saved rule, a named person and a clear request.</span></div></div>
+    <div class="safe"><span class="check">✓</span><div><b>Never twice</b><span>Each reply has an idempotency key; one that may have gone out is never retried blind.</span></div></div>
+    <div class="safe"><span class="check">✓</span><div><b>Local only</b><span>No server, no cloud database. Tokens live in your OS keychain.</span></div></div>
+    <div class="safe"><span class="check">✓</span><div><b>Caps and Undo</b><span>Daily caps per rule, recipient checks, and an action log with Undo.</span></div></div>
+  </div>
+</div></section>
+
+<section id="roadmap" class="alt road"><div class="wrap">
+  <div class="eyebrow">What's next</div>
+  <h2 class="serif">Coming after the beta.</h2>
+  <p class="sub">Shaped by your feedback. Open an issue to vote or suggest.</p>
+  <div class="grid">
+    <div class="card"><span class="soon">Next</span><div class="icon c1">◐</div><h3>Focus mode</h3><p>Silence everything but Critical for a set time, with a summary of what waited when you're back.</p></div>
+    <div class="card"><span class="soon">Planned</span><div class="icon c2">☀</div><h3>Daily digest</h3><p>A morning brief of what needs you, drafted replies ready to send.</p></div>
+    <div class="card"><span class="soon">Planned</span><div class="icon c3">⌘</div><h3>More sources</h3><p>Linear, Notion, Microsoft Teams and Outlook alongside the five today.</p></div>
+    <div class="card"><span class="soon">Planned</span><div class="icon c4">◇</div><h3>Smart scheduling</h3><p>Propose meeting times from your free slots straight from a message.</p></div>
+    <div class="card"><span class="soon">Planned</span><div class="icon c1">⇄</div><h3>Shared team rules</h3><p>Share Auto rules and priorities with your team, safely reviewed.</p></div>
+    <div class="card"><span class="soon">Exploring</span><div class="icon c2">⊞</div><h3>Windows &amp; Linux</h3><p>Native notifications and keychains beyond macOS.</p></div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="cta">
+    <span class="pill"><span class="dot"></span>Beta</span>
+    <h2 class="serif">Try Switchboard today.</h2>
+    <p class="sub" style="margin:0 auto 26px">It's a beta: expect rough edges, and tell us what you find.</p>
+    <div class="ctas"><a class="btn primary" href="https://github.com/hassamali898/switchboard/releases/latest">Download v1.0.0-beta.1</a><a class="btn ghost" href="https://github.com/hassamali898/switchboard/issues">Report an issue</a></div>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  <span>© 2026 hassamali898 · MIT License · Not affiliated with Anthropic.</span>
+  <span><a href="https://github.com/hassamali898/switchboard">GitHub</a> · <a href="https://github.com/hassamali898/switchboard/blob/main/THIRD_PARTY_NOTICES.md">Notices</a></span>
+</div></footer>
+</body>
+</html>

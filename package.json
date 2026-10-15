@@ -1,0 +1,16 @@
+{
+  "name": "switchboard-plugin",
+  "private": true,
+  "type": "module",
+  "description": "Type-checking for the Switchboard hooks module (the engine runs the .tsx directly).",
+  "scripts": {
+    "typecheck": "tsc -p .",
+    "validate": "claude plugin validate .",
+    "check": "sh scripts/check-plugin.sh",
+    "test:py": ".venv/bin/python -m pytest -q",
+    "preview": "node scripts/preview.ts"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  }
+}

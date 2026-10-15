@@ -1,0 +1,17 @@
+# Auto-mode rules (phase 4). Not active in phase 1; kept here so the format is
+# settled early. New rules start in ask_first mode.
+rules:
+  - name: Review PRs
+    mode: ask_first          # ask_first | auto
+    enabled: true
+    when:
+      people: ["Ahmed Raza"]
+      asks: pr_review
+    only_if:
+      repos: ["acme/acme-*"]
+      work_hours: "09:00-18:00"
+    do: [github_post_review]
+    daily_cap: 5
+    instructions: >
+      Review the whole PR using my checklist, post comments and a summary
+      review as me.

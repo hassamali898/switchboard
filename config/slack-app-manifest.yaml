@@ -1,0 +1,36 @@
+# Slack app for Switchboard. The Inbox pane's "Create the Slack app" link opens Slack's
+# Create App form with this manifest filled in (or: api.slack.com/apps → Create New App →
+# From a manifest → paste this). Then, from the pane:
+#   1. Install to Workspace, copy the User OAuth Token (xoxp-…), press "Paste user token"
+#   2. Basic Information → App-Level Tokens → Generate (scope connections:write), copy the
+#      xapp-… token, press "Paste app token"
+# Tokens are read from the clipboard into the OS keychain and the clipboard is cleared.
+display_information:
+  name: Switchboard
+  description: Personal inbox for Claude Code. Reads your DMs, mentions and threads; replies as you when you press Send.
+features:
+  bot_user:
+    display_name: Switchboard
+    always_online: false
+oauth_config:
+  scopes:
+    # Minimal user scopes (PLAN.md → Setup requirements). No admin scopes.
+    user:
+      - im:history
+      - mpim:history
+      - channels:history
+      - groups:history
+      - chat:write
+      - users:read
+      - users:read.email
+settings:
+  event_subscriptions:
+    # Events on behalf of the user who installs the app, delivered over Socket Mode.
+    user_events:
+      - message.im
+      - message.mpim
+      - message.channels
+      - message.groups
+  socket_mode_enabled: true
+  org_deploy_enabled: false
+  token_rotation_enabled: false

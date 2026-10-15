@@ -1,0 +1,65 @@
+# Switchboard alert levels. Copy to ~/.switchboard/priorities.yaml and edit.
+# Rules are checked top to bottom; the first match sets the level.
+# Levels: critical | high | normal | quiet
+#   critical  full-window dialog (phase 2), sound, OS notification
+#   high      toast that stays until dismissed, badge, sound
+#   normal    toast for 6 s, badge
+#   quiet     badge only, no toast
+#
+# Conditions (all given ones must match):
+#   source: slack | gmail | calendar | github | jira
+#   kind:   dm | mention | thread | mail | ...   (one or a list)
+#   from:   a name, Slack user id or email      (one or a list)
+#   domain: email domain, e.g. acme.com
+#   channel: Slack channel name without '#'
+#   keywords: [words]   case-insensitive, any one matches title or body
+#   label:  Gmail label id, e.g. CATEGORY_PROMOTIONS
+
+default_level: normal
+
+rules:
+  - name: Message from my lead
+    from: ["Ahmed Raza"]
+    level: critical
+  - name: Prod incidents
+    source: slack
+    channel: acme-prod
+    level: critical
+  - name: Review requests by DM
+    source: slack
+    kind: dm
+    keywords: ["review", "PR #"]
+    level: high
+  - name: Any DM or mention
+    source: slack
+    kind: [dm, mention]
+    level: normal
+  - name: Newsletters and promotions
+    source: gmail
+    label: [CATEGORY_PROMOTIONS, CATEGORY_UPDATES, CATEGORY_SOCIAL]
+    level: quiet
+  - name: Primary mail
+    source: gmail
+    level: normal
+
+# Focus and quiet hours lower everything except Critical to Quiet.
+focus: false
+quiet_hours:
+  enabled: true
+  start: "20:00"
+  end: "09:00"
+
+# Never shown to Claude (no AI drafts, no auto rules). Still listed in the inbox.
+excluded:
+  gmail_labels: []          # e.g. Label_123 for an HR label
+  slack_channels: []        # e.g. hr-private
+  keywords: ["password", "salary", "payslip", "OTP", "one-time code"]
+
+# Muted: dropped silently, never queued.
+muted:
+  senders: []               # names, Slack ids or emails
+  slack_channels: []
+
+slack:
+  # v1 scope: dms, mentions, threads (threads you started or replied in)
+  watch: [dms, mentions, threads]

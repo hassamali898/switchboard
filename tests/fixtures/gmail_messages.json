@@ -1,0 +1,133 @@
+{
+ "inbox": {
+  "id": "m1",
+  "threadId": "t1",
+  "labelIds": [
+   "INBOX",
+   "UNREAD",
+   "CATEGORY_PERSONAL"
+  ],
+  "snippet": "Attached are the Q4 roadmap slides",
+  "internalDate": "1759480000000",
+  "payload": {
+   "mimeType": "multipart/mixed",
+   "headers": [
+    {
+     "name": "From",
+     "value": "Sara Khan <sara@example.com>"
+    },
+    {
+     "name": "To",
+     "value": "Alex Doe <alex@example.com>, team@example.com"
+    },
+    {
+     "name": "Cc",
+     "value": "lead@example.com"
+    },
+    {
+     "name": "Subject",
+     "value": "Q4 roadmap review, slides attached"
+    },
+    {
+     "name": "Message-ID",
+     "value": "<abc123@mail.example.com>"
+    },
+    {
+     "name": "References",
+     "value": "<prev@mail.example.com>"
+    }
+   ],
+   "parts": [
+    {
+     "mimeType": "multipart/alternative",
+     "parts": [
+      {
+       "mimeType": "text/plain",
+       "body": {
+        "data": "SGkgQWxleCwKCkF0dGFjaGVkIGFyZSB0aGUgUTQgcm9hZG1hcCBzbGlkZXMuCgpPbiBNb24sIFNhcmEgd3JvdGU6Cj4gb2xkIHRleHQ"
+       }
+      },
+      {
+       "mimeType": "text/html",
+       "body": {
+        "data": "PHA-SGkgQWxleDwvcD4"
+       }
+      }
+     ]
+    },
+    {
+     "mimeType": "application/pdf",
+     "filename": "Q4-roadmap.pdf",
+     "body": {
+      "attachmentId": "a1"
+     }
+    }
+   ]
+  }
+ },
+ "html_only": {
+  "id": "m2",
+  "threadId": "t2",
+  "labelIds": [
+   "INBOX"
+  ],
+  "snippet": "hello",
+  "internalDate": "1759480000000",
+  "payload": {
+   "mimeType": "text/html",
+   "headers": [
+    {
+     "name": "From",
+     "value": "news@example.com"
+    },
+    {
+     "name": "Subject",
+     "value": "News"
+    }
+   ],
+   "body": {
+    "data": "PGh0bWw-PHN0eWxlPnB7fTwvc3R5bGU-PHA-SGVsbG8gPGI-dGhlcmU8L2I-PC9wPjwvaHRtbD4"
+   }
+  }
+ },
+ "sent": {
+  "id": "m3",
+  "threadId": "t1",
+  "labelIds": [
+   "SENT"
+  ],
+  "internalDate": "1759480000000",
+  "payload": {
+   "headers": [
+    {
+     "name": "From",
+     "value": "alex@example.com"
+    },
+    {
+     "name": "Subject",
+     "value": "Re: x"
+    }
+   ]
+  }
+ },
+ "from_me_inbox": {
+  "id": "m4",
+  "threadId": "t4",
+  "labelIds": [
+   "INBOX"
+  ],
+  "internalDate": "1759480000000",
+  "payload": {
+   "headers": [
+    {
+     "name": "From",
+     "value": "Alex <alex@example.com>"
+    },
+    {
+     "name": "Subject",
+     "value": "note to self"
+    }
+   ]
+  }
+ }
+}

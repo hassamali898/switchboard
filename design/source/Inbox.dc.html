@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Inbox pane</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#C96442}a:hover{color:#D97757}
+@keyframes toastIn{0%{opacity:0;transform:translateY(16px) scale(.97)}70%{opacity:1;transform:translateY(-2px)}100%{opacity:1;transform:none}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes bar{from{width:0}to{width:100%}}
+@keyframes drain{from{width:100%}to{width:0}}
+@keyframes ring{0%{box-shadow:0 0 0 0 rgba(217,119,87,.5)}70%{box-shadow:0 0 0 7px rgba(217,119,87,0)}100%{box-shadow:0 0 0 0 rgba(217,119,87,0)}}
+.toast{opacity:0;animation:toastIn .5s cubic-bezier(.2,.9,.3,1.2) forwards}
+.fade{opacity:0;animation:fadeUp .3s ease-out forwards}
+.pulse{animation:pulse 1.6s ease-in-out infinite}
+.fill{display:block;height:100%;width:0;animation:bar 3s linear forwards}
+.drain{display:block;height:100%;animation:drain 480s linear forwards}
+.ring{animation:ring 1.8s ease-out infinite}
+.ib:hover{filter:brightness(0.96)}
+@media (prefers-reduced-motion: reduce){*{animation-duration:.01ms !important;animation-delay:0s !important;animation-iteration-count:1 !important}}
+</style>
+</helmet>
+<div style="width: 1440px; height: 900px; box-sizing: border-box; padding: 24px 28px; display: flex; flex-direction: column; gap: 14px; background: {{T.page}}; color: {{T.ink}}; font-family: 'Anthropic Sans', system-ui, -apple-system, 'Segoe UI', sans-serif; transition: background .3s, color .3s">
+<div style="display: flex; align-items: center; gap: 12px">
+<span style="font-family: 'Anthropic Serif', Georgia, 'Times New Roman', serif; font-size: 24px; font-weight: 500">Inbox</span>
+<span style="font-size: 13px; color: {{T.faint}}">Every source in one pane · click anything</span>
+<span style="margin-left: auto; display: flex; gap: 8px">
+<button type="button" onClick="{{replay}}" class="ib" style="min-height: 36px; display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; border: 0.5px solid {{T.line2}}; background: {{T.win}}; color: {{T.ink}}; font: inherit; font-size: 13px; cursor: pointer"><svg width="15" height="15" viewBox="0 0 24 24" style="fill: none; stroke: {{T.ink}}; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round"><path d="{{I.bell}}"></path></svg>Replay alerts</button>
+<button type="button" onClick="{{toggleTheme}}" class="ib" style="min-height: 36px; display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; border: 0.5px solid {{T.line2}}; background: {{T.win}}; color: {{T.ink}}; font: inherit; font-size: 13px; cursor: pointer"><svg width="15" height="15" viewBox="0 0 24 24" style="fill: none; stroke: {{T.ink}}; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round"><path d="{{themeIcon}}"></path></svg>{{themeLabel}}</button>
+</span>
+</div>
+<div style="flex: 1; min-height: 0; display: flex; flex-direction: column; border-radius: 14px; overflow: hidden; border: 0.5px solid {{T.line2}}; background: {{T.win}}; box-shadow: {{T.shadow}}">
+<div style="height: 42px; flex: none; display: flex; align-items: center; gap: 8px; padding: 0 16px; border-bottom: 0.5px solid {{T.line}}; background: {{T.side}}">
+<span style="width: 11px; height: 11px; border-radius: 50%; background: #FF5F57"></span><span style="width: 11px; height: 11px; border-radius: 50%; background: #FEBC2E"></span><span style="width: 11px; height: 11px; border-radius: 50%; background: #28C840"></span>
+<span style="margin: 0 auto; display: flex; padding: 3px; border-radius: 8px; background: {{T.hover}}; font-size: 12.5px"><span style="padding: 4px 14px; color: {{T.faint}}">Chat</span><span style="padding: 4px 14px; color: {{T.faint}}">Cowork</span><span style="padding: 4px 14px; border-radius: 6px; background: {{T.win}}; color: {{T.ink}}; box-shadow: 0 1px 2px rgba(0,0,0,0.08)">Code</span></span>
+<span style="width: 64px"></span>
+</div>
+<div style="flex: 1; min-height: 0; display: flex; position: relative">
+<aside style="width: 220px; flex: none; box-sizing: border-box; padding: 14px 10px; display: flex; flex-direction: column; gap: 4px; background: {{T.side}}; border-right: 0.5px solid {{T.line}}">
+<div style="display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; font-size: 13.5px"><svg width="16" height="16" viewBox="0 0 24 24" style="fill: none; stroke: {{T.clay}}; stroke-width: 2; stroke-linecap: round"><path d="{{I.plus}}"></path></svg>New session</div>
+<div style="padding: 10px 10px 4px; font-size: 11.5px; color: {{T.faint}}">Recents</div>
+<div style="padding: 8px 10px; border-radius: 8px; font-size: 13.5px; background: {{T.hover}}">auth-refactor</div>
+<div style="padding: 8px 10px; border-radius: 8px; font-size: 13.5px; color: {{T.muted}}">acme-api tests</div>
+<div style="padding: 8px 10px; border-radius: 8px; font-size: 13.5px; color: {{T.muted}}">release notes 2.3</div>
+<div style="margin-top: auto; display: flex; align-items: center; gap: 8px; padding: 8px 10px"><span style="width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: {{T.clay}}; color: #FFFFFF; font-size: 12px; font-weight: 600">HA</span><span style="font-size: 13px">Alex Doe</span></div>
+</aside>
+<main style="flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; padding: 28px 32px 20px; box-sizing: border-box; gap: 14px; position: relative">
+<div style="width: 100%; max-width: 560px; display: flex; flex-direction: column; gap: 14px">
+<div style="align-self: flex-end; max-width: 80%; padding: 10px 14px; border-radius: 14px; background: {{T.hover}}; font-size: 14px">Refactor the auth middleware to use the new session store</div>
+<div style="display: flex; flex-direction: column; gap: 8px; font-size: 14px; line-height: 1.5"><span style="display: flex; align-items: center; gap: 8px; font-family: 'Anthropic Mono', 'JetBrains Mono', monospace; font-size: 12.5px; color: {{T.faint}}"><span class="pulse" style="color: {{T.clay}}">✻</span> Editing src/auth/session.ts</span><span style="height: 10px; width: 92%; border-radius: 5px; background: {{T.skel}}"></span><span style="height: 10px; width: 78%; border-radius: 5px; background: {{T.skel}}"></span><span style="height: 10px; width: 64%; border-radius: 5px; background: {{T.skel}}"></span></div>
+</div>
+<div style="margin-top: auto; width: 100%; max-width: 560px; box-sizing: border-box; padding: 12px 12px 12px 16px; border-radius: 16px; border: 0.5px solid {{T.line2}}; background: {{T.card}}; display: flex; align-items: center; gap: 10px; box-shadow: {{T.shadow}}"><span style="flex: 1; font-size: 14px; color: {{T.faint}}">Reply to Claude…</span><span style="font-size: 12px; padding: 3px 8px; border-radius: 6px; background: {{T.hover}}; color: {{T.muted}}">/inbox</span><span style="width: 32px; height: 32px; border-radius: 9px; display: grid; place-items: center; background: {{T.clay}}"><svg width="16" height="16" viewBox="0 0 24 24" style="fill: none; stroke: #FFFFFF; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round"><path d="{{I.send}}"></path></svg></span></div>
+<sc-if value="{{showToasts}}" hint-placeholder-val="{{true}}">
+<div style="position: absolute; left: 24px; bottom: 96px; width: 300px; display: flex; flex-direction: column; gap: 8px">
+<sc-for list="{{toasts}}" as="t" hint-placeholder-count="3">
+<div class="toast" style="animation-delay: {{t.d}}ms; display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; background: {{T.card}}; border: 0.5px solid {{t.bd}}; box-shadow: {{T.pop}}">
+<span style="width: 30px; height: 30px; border-radius: 8px; flex: none; display: grid; place-items: center; background: {{t.bg}}"><svg width="16" height="16" viewBox="0 0 24 24" style="fill: none; stroke: {{t.c}}; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="{{t.path}}"></path></svg></span>
+<span style="display: flex; flex-direction: column; min-width: 0"><span style="font-size: 13px; font-weight: 600">{{t.title}}</span><span style="font-size: 12px; color: {{T.faint}}">{{t.sub}}</span></span>
+<span style="margin-left: auto; width: 8px; height: 8px; border-radius: 50%; flex: none; background: {{t.dot}}"></span>
+</div>
+</sc-for>
+</div>
+</sc-if>
+</main>
+<section style="width: 460px; flex: none; box-sizing: border-box; padding: 16px; display: flex; flex-direction: column; gap: 12px; border-left: 0.5px solid {{T.line}}; background: {{T.panel}}; overflow: hidden">
+<div style="display: flex; align-items: center; gap: 8px">
+<span style="font-family: 'Anthropic Serif', Georgia, serif; font-size: 20px; font-weight: 500">Inbox</span>
+<span class="pulse" style="width: 7px; height: 7px; border-radius: 50%; background: {{T.ok}}"></span>
+<span style="font-size: 12px; color: {{T.faint}}">{{countLabel}}</span>
+<span style="margin-left: auto; display: flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: 999px; background: {{T.sel}}; color: {{T.clay}}; font-size: 12px; font-weight: 600"><svg width="13" height="13" viewBox="0 0 24 24" style="fill: none; stroke: {{T.clay}}; stroke-width: 2; stroke-linejoin: round"><path d="{{I.bolt}}"></path></svg>Auto on</span>
+<span title="Settings" style="width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; border: 0.5px solid {{T.line2}}"><svg width="15" height="15" viewBox="0 0 24 24" style="fill: none; stroke: {{T.muted}}; stroke-width: 1.8; stroke-linecap: round"><path d="{{I.sliders}}"></path></svg></span>
+</div>
+<div style="display: flex; gap: 6px">
+<sc-for list="{{filters}}" as="f" hint-placeholder-count="6">
+<button type="button" onClick="{{f.pick}}" aria-label="{{f.name}}" title="{{f.name}}" class="ib" style="flex: 1; min-height: 38px; display: flex; align-items: center; justify-content: center; gap: 5px; border-radius: 9px; border: 0.5px solid {{f.bd}}; background: {{f.bg}}; color: {{T.ink}}; font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer"><svg width="15" height="15" viewBox="0 0 24 24" style="fill: none; stroke: {{f.c}}; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="{{f.path}}"></path></svg>{{f.count}}</button>
+</sc-for>
+</div>
+<div style="display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; background: {{CAL.bg}}; border: 0.5px solid {{T.line}}">
+<span style="width: 38px; height: 38px; border-radius: 10px; flex: none; display: grid; place-items: center; background: {{T.card}}"><svg width="19" height="19" viewBox="0 0 24 24" style="fill: none; stroke: {{CAL.c}}; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="{{I.cal}}"></path></svg></span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px"><span style="display: flex; gap: 8px; align-items: baseline"><span style="font-size: 14px; font-weight: 600">Sprint planning</span><span style="font-size: 12px; color: {{CAL.c}}; font-weight: 600">in 8 min</span></span><span style="height: 4px; border-radius: 2px; overflow: hidden; background: {{T.line}}; display: block"><span class="drain" style="background: {{CAL.c}}"></span></span></span>
+<span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: {{T.muted}}"><span style="width: 22px; height: 22px; border-radius: 50%; background: #788C5D; color: #FFF; font-size: 10px; display: grid; place-items: center">BA</span><span style="width: 22px; height: 22px; border-radius: 50%; background: #6A9BCC; color: #FFF; font-size: 10px; display: grid; place-items: center; margin-left: -8px">AR</span><span style="margin-left: 2px">+4</span></span>
+<button type="button" class="ib" style="min-height: 34px; display: flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 8px; border: none; background: {{T.btn}}; color: {{T.onBtn}}; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer"><svg width="14" height="14" viewBox="0 0 24 24" style="fill: none; stroke: #FFFFFF; stroke-width: 2; stroke-linejoin: round"><path d="{{I.video}}"></path></svg>Join</button>
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px; min-height: 0">
+<sc-for list="{{items}}" as="it" hint-placeholder-count="7">
+<div style="border-radius: 12px; border: 0.5px solid {{it.bd}}; background: {{it.bg}}">
+<button type="button" onClick="{{it.pick}}" class="ib" style="display: flex; align-items: center; gap: 10px; width: 100%; box-sizing: border-box; padding: 8px 10px; border: none; background: transparent; color: {{T.ink}}; font: inherit; cursor: pointer; text-align: left">
+<span class="{{it.ringCls}}" style="width: 34px; height: 34px; border-radius: 9px; flex: none; display: grid; place-items: center; background: {{it.sbg}}"><svg width="17" height="17" viewBox="0 0 24 24" style="fill: none; stroke: {{it.sc}}; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="{{it.path}}"></path></svg></span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px"><span style="display: flex; align-items: center; gap: 6px"><span style="font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{it.who}}</span><sc-if value="{{it.hasAuto}}" hint-placeholder-val="{{false}}"><span style="display: flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: 999px; background: {{T.sel}}; color: {{T.clay}}"><svg width="10" height="10" viewBox="0 0 24 24" style="fill: none; stroke: {{T.clay}}; stroke-width: 2.4; stroke-linejoin: round"><path d="{{I.bolt}}"></path></svg>{{it.auto}}</span></sc-if></span><span style="font-size: 12.5px; color: {{T.muted}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{it.line}}</span></span>
+<span style="display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex: none"><span style="font-size: 11.5px; color: {{T.faint}}">{{it.time}}</span><span title="{{it.lvlName}}" style="width: 8px; height: 8px; border-radius: 50%; background: {{it.lc}}"></span></span>
+</button>
+<sc-if value="{{it.open}}" hint-placeholder-val="{{false}}">
+<div class="fade" style="padding: 0 12px 12px 54px; display: flex; flex-direction: column; gap: 10px">
+<div style="font-size: 13px; line-height: 1.5; color: {{T.muted}}">{{it.body}}</div>
+<sc-if value="{{it.isReply}}" hint-placeholder-val="{{true}}">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; align-items: center; gap: 6px"><svg width="14" height="14" viewBox="0 0 24 24" style="fill: none; stroke: {{T.clay}}; stroke-width: 2; stroke-linejoin: round"><path d="{{I.spark}}"></path></svg><sc-for list="{{it.opts}}" as="o" hint-placeholder-count="3"><button type="button" onClick="{{o.pick}}" style="min-height: 28px; padding: 3px 10px; border-radius: 999px; border: 0.5px solid {{o.bd}}; background: {{o.bg}}; color: {{o.fg}}; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer">{{o.k}}</button></sc-for></div>
+<div style="padding: 10px 12px; border-radius: 10px; background: {{T.card}}; border: 0.5px solid {{T.line2}}; font-size: 13.5px; line-height: 1.5">{{it.preview}}</div>
+<sc-if value="{{it.sending}}" hint-placeholder-val="{{false}}"><div style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: {{T.muted}}"><span style="flex: 1; height: 4px; border-radius: 2px; overflow: hidden; background: {{T.line}}; display: block"><span class="fill" style="background: {{T.clay}}"></span></span><button type="button" onClick="{{undo}}" style="min-height: 26px; padding: 2px 10px; border-radius: 6px; border: 0.5px solid {{T.line2}}; background: transparent; color: {{T.ink}}; font: inherit; font-size: 12px; cursor: pointer">Undo</button></div></sc-if>
+<sc-if value="{{it.sent}}" hint-placeholder-val="{{false}}"><div class="fade" style="display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 8px; background: {{T.okBg}}; color: {{T.ok}}; font-size: 13px; font-weight: 600"><svg width="14" height="14" viewBox="0 0 24 24" style="fill: none; stroke: {{T.ok}}; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round"><path d="{{I.check}}"></path></svg>Sent as you</div></sc-if>
+<sc-if value="{{it.idle}}" hint-placeholder-val="{{true}}">
+<div style="display: flex; align-items: center; gap: 6px">
+<button type="button" onClick="{{it.send}}" class="ib" style="min-height: 34px; display: flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 8px; border: none; background: {{T.btn}}; color: {{T.onBtn}}; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer"><svg width="14" height="14" viewBox="0 0 24 24" style="fill: none; stroke: #FFFFFF; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round"><path d="{{I.send}}"></path></svg>Send</button>
+<sc-for list="{{tools}}" as="tl" hint-placeholder-count="4"><button type="button" aria-label="{{tl.name}}" title="{{tl.name}}" class="ib" style="width: 34px; height: 34px; display: grid; place-items: center; border-radius: 8px; border: 0.5px solid {{T.line2}}; background: transparent; cursor: pointer"><svg width="15" height="15" viewBox="0 0 24 24" style="fill: none; stroke: {{T.muted}}; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round"><path d="{{tl.path}}"></path></svg></button></sc-for>
+</div>
+</sc-if>
+</div>
+</sc-if>
+<sc-if value="{{it.isAction}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; gap: 6px; flex-wrap: wrap"><sc-for list="{{it.acts}}" as="a" hint-placeholder-count="3"><button type="button" class="ib" style="min-height: 32px; display: flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 8px; border: 0.5px solid {{a.bd}}; background: {{a.bg}}; color: {{a.fg}}; font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer"><svg width="13" height="13" viewBox="0 0 24 24" style="fill: none; stroke: {{a.fg}}; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="{{a.path}}"></path></svg>{{a.t}}</button></sc-for></div>
+</sc-if>
+</div>
+</sc-if>
+</div>
+</sc-for>
+</div>
+</section>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"$preview":{"width":1440,"height":900}}'>
+const I = {
+  slack: 'M5 9h14M5 15h14M10 4L8 20M16 4l-2 16', gmail: 'M3 6h18v12H3zM3 7l9 6 9-6', cal: 'M4 5h16v15H4zM4 10h16M8 3v4M16 3v4',
+  github: 'M6 4v10M8 18a2 2 0 1 1-4 0a2 2 0 1 1 4 0M20 6a2 2 0 1 1-4 0a2 2 0 1 1 4 0M18 8v4a4 4 0 0 1-4 4h-4', jira: 'M4 4h16v16H4zM8 12l3 3 5-6',
+  all: 'M3 13h5l2 3h4l2-3h5M5 5h14l2 8v6H3v-6z', bolt: 'M13 2L4 14h7l-1 8 9-12h-7z', bell: 'M6 16V11a6 6 0 1 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0',
+  send: 'M12 19V5M5 12l7-7 7 7', spark: 'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z', edit: 'M4 20h4L19 9l-4-4L4 16zM14 6l4 4',
+  draft: 'M5 4h11l3 3v13H5zM8 4v5h7V4', skip: 'M5 5l8 7-8 7zM17 5v14', check: 'M5 12l5 5 9-10', ext: 'M14 4h6v6M20 4l-9 9M18 14v6H4V6h6',
+  video: 'M3 7h12v10H3zM15 10l6-3v10l-6-3', plus: 'M12 5v14M5 12h14', clock: 'M12 21a9 9 0 1 0 0-18a9 9 0 0 0 0 18M12 7v5l3 2',
+  sliders: 'M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M14 4v4M8 10v4M16 16v4', sun: 'M12 16a4 4 0 1 0 0-8a4 4 0 0 0 0 8M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5',
+  moon: 'M20 14A8 8 0 1 1 10 4a6 6 0 0 0 10 10z', play: 'M7 5l12 7-12 7z', comment: 'M4 5h16v11H9l-5 4z', archive: 'M3 4h18v4H3zM5 8v12h14V8M10 12h4'
+};
+const TH = {
+  light: { page: '#FAF9F5', win: '#FFFFFF', side: '#F5F4ED', panel: '#FAF9F5', card: '#FFFFFF', ink: '#141413', muted: '#5E5D59', faint: '#87867F', line: 'rgba(31,30,29,0.10)', line2: 'rgba(31,30,29,0.22)', hover: 'rgba(115,114,108,0.10)', sel: 'rgba(217,119,87,0.12)', selBd: 'rgba(201,100,66,0.55)', clay: '#C96442', btn: '#C96442', onBtn: '#FFFFFF', skel: '#EEECE3', shadow: '0 1px 2px rgba(20,20,19,0.05), 0 10px 30px rgba(20,20,19,0.06)', pop: '0 14px 36px rgba(20,20,19,0.14)', ok: '#3F7A2E', okBg: 'rgba(85,138,66,0.12)' },
+  dark: { page: '#1F1E1D', win: '#262624', side: '#1F1E1D', panel: '#262624', card: '#30302E', ink: '#FAF9F5', muted: '#C2C0B6', faint: '#9C9A92', line: 'rgba(222,220,209,0.10)', line2: 'rgba(222,220,209,0.22)', hover: 'rgba(222,220,209,0.07)', sel: 'rgba(217,119,87,0.16)', selBd: 'rgba(217,119,87,0.6)', clay: '#E08A6B', btn: '#C96442', onBtn: '#FFFFFF', skel: '#3D3D3A', shadow: '0 1px 2px rgba(0,0,0,0.3), 0 10px 30px rgba(0,0,0,0.3)', pop: '0 14px 36px rgba(0,0,0,0.5)', ok: '#9CCB86', okBg: 'rgba(85,138,66,0.22)' }
+};
+const SC = {
+  light: { slack: ['#611F69', 'rgba(97,31,105,0.10)'], gmail: ['#C5221F', 'rgba(234,67,53,0.10)'], cal: ['#9A5B00', 'rgba(249,171,0,0.16)'], github: ['#24292F', 'rgba(36,41,47,0.08)'], jira: ['#0052CC', 'rgba(0,82,204,0.10)'], all: ['#C96442', 'rgba(217,119,87,0.12)'] },
+  dark: { slack: ['#E2A9EA', 'rgba(226,169,234,0.14)'], gmail: ['#FF8A7E', 'rgba(234,67,53,0.18)'], cal: ['#FBC02D', 'rgba(249,171,0,0.14)'], github: ['#E6EDF3', 'rgba(230,237,243,0.10)'], jira: ['#8DB8FF', 'rgba(0,82,204,0.30)'], all: ['#E08A6B', 'rgba(217,119,87,0.16)'] }
+};
+const LV = { light: { crit: '#B42318', high: '#B7791F', norm: '#87867F', quiet: '#D1CFC5' }, dark: { crit: '#F87171', high: '#FBBF24', norm: '#9C9A92', quiet: '#4D4C48' } };
+const LVN = { crit: 'Critical', high: 'High', norm: 'Normal', quiet: 'Quiet' };
+const ITEMS = [
+  { id: 1, src: 'slack', lvl: 'norm', who: 'Ahmed Raza', line: 'Can you review PR #482 before 5pm?', time: '2m', body: '“Can you review PR #482 before 5pm? It’s the session store migration.”', opts: [['Short', 'Sure, I’ll review it by 4pm.'], ['Detailed', 'On it. I’ll start with the auth changes and leave comments by 4pm.'], ['Ask', 'Happy to. Any part you want me to focus on?']] },
+  { id: 2, src: 'github', lvl: 'high', who: 'acme-api #482', line: 'Review requested · +412 −96 · checks pass', time: '3m', auto: 'Review ready', body: 'Claude prepared 6 comments and a summary. Nothing is posted until you approve.', acts: [['Approve and post', 'check', true], ['View review', 'ext', false], ['Later', 'clock', false]] },
+  { id: 3, src: 'github', lvl: 'crit', who: 'acme-web · main', line: 'CI failed · 3 e2e specs', time: '12m', body: 'checkout, login and profile specs failed on 9f2c1ab.', acts: [['Show failures', 'spark', true], ['Re-run', 'play', false], ['Open run', 'ext', false]] },
+  { id: 4, src: 'jira', lvl: 'high', who: 'ACME-1290', line: 'Assigned · Safari login redirect loop', time: '9m', body: 'Priority Highest · Sprint 42 · reporter Maya Chen', acts: [['Start', 'play', true], ['Investigate', 'spark', false], ['Comment', 'comment', false]] },
+  { id: 5, src: 'gmail', lvl: 'norm', who: 'Sara Khan', line: 'Q4 roadmap review, slides attached', time: '14m', body: '“Could you add the Acme milestones to the deck by Wednesday?”', opts: [['Short', 'Will do, I’ll add them by Wednesday.'], ['Detailed', 'Thanks Sara. I’ll add the Acme milestones and owners by Wednesday noon.'], ['Ask', 'Sure. Should I include Q1 dates too?']] },
+  { id: 6, src: 'slack', lvl: 'norm', who: '#acme-devs', line: '@alex deploy is blocked on your review', time: '31m', body: '“@alex deploy is blocked on your review of #482, can we get it today?”', opts: [['Short', 'Reviewing now, done within the hour.'], ['Detailed', 'On it. Review will be in by 4:30, then you can deploy.'], ['Ask', 'Is anything besides #482 blocking?']] },
+  { id: 7, src: 'gmail', lvl: 'quiet', who: 'GitHub Changelog', line: 'Newsletter', time: '2h', auto: 'Archived', body: 'Archived by your “Not important” rule. Undo for 24 h.', acts: [['Undo', 'skip', true], ['Open', 'ext', false]] }
+];
+class Component extends DCLogic {
+  state = { dark: null, filter: 'all', sel: 1, opt: {}, sending: 0, sent: {}, toasts: true };
+  timers = [];
+  componentWillUnmount() { this.timers.forEach(clearTimeout); }
+  isDark() { return this.state.dark === null ? (this.props.theme ?? 'light') === 'dark' : this.state.dark; }
+  later(fn, ms) { this.timers.push(setTimeout(fn, ms)); }
+  send(id) { this.setState({ sending: id }); this.later(() => { if (this.state.sending !== id) return; const sent = Object.assign({}, this.state.sent); sent[id] = true; this.setState({ sending: 0, sent: sent }); }, 3000); }
+  renderVals() {
+    const st = this.state, mode = this.isDark() ? 'dark' : 'light', T = TH[mode], S = SC[mode], L = LV[mode];
+    const vis = ITEMS.filter(it => st.filter === 'all' || it.src === st.filter);
+    const items = vis.map(it => {
+      const open = it.id === st.sel, oi = st.opt[it.id] || 0;
+      return {
+        who: it.who, line: it.line, time: it.time, body: it.body, hasAuto: !!it.auto, auto: it.auto || '',
+        path: I[it.src], sc: S[it.src][0], sbg: S[it.src][1], lc: L[it.lvl], lvlName: LVN[it.lvl], ringCls: it.lvl === 'crit' ? 'ring' : '',
+        open: open, bg: open ? T.card : 'transparent', bd: open ? T.selBd : 'transparent',
+        pick: () => this.setState({ sel: open ? 0 : it.id }),
+        isReply: !!it.opts, isAction: !!it.acts,
+        opts: (it.opts || []).map((o, i) => ({ k: o[0], bg: i === oi ? T.sel : 'transparent', bd: i === oi ? T.selBd : T.line2, fg: i === oi ? T.clay : T.muted, pick: () => { const opt = Object.assign({}, st.opt); opt[it.id] = i; this.setState({ opt: opt }); } })),
+        preview: it.opts ? it.opts[oi][1] : '',
+        sending: st.sending === it.id, sent: !!st.sent[it.id], idle: st.sending !== it.id && !st.sent[it.id],
+        send: () => this.send(it.id),
+        acts: (it.acts || []).map(a => ({ t: a[0], path: I[a[1]], bg: a[2] ? T.btn : 'transparent', fg: a[2] ? T.onBtn : T.ink, bd: a[2] ? T.btn : T.line2 }))
+      };
+    });
+    const srcs = ['all', 'slack', 'gmail', 'cal', 'github', 'jira'];
+    const names = { all: 'All', slack: 'Slack', gmail: 'Gmail', cal: 'Calendar', github: 'GitHub', jira: 'Jira' };
+    const filters = srcs.map(k => ({ name: names[k], path: I[k], c: S[k][0], count: k === 'all' ? ITEMS.length + 1 : k === 'cal' ? 1 : ITEMS.filter(x => x.src === k).length, bg: st.filter === k ? S[k][1] : 'transparent', bd: st.filter === k ? S[k][0] : T.line2, pick: () => this.setState({ filter: k }) }));
+    const toasts = [
+      { d: 300, path: I.github, c: S.github[0], bg: S.github[1], bd: L.crit, dot: L.crit, title: 'CI failed on main', sub: 'acme-web · 3 specs' },
+      { d: 1100, path: I.jira, c: S.jira[0], bg: S.jira[1], bd: T.line2, dot: L.high, title: 'ACME-1290 assigned', sub: 'Priority Highest' },
+      { d: 1900, path: I.slack, c: S.slack[0], bg: S.slack[1], bd: T.line2, dot: L.norm, title: 'Ahmed Raza', sub: 'Can you review PR #482?' }
+    ];
+    return {
+      T: T, I: I, CAL: { c: S.cal[0], bg: S.cal[1] }, items: items, filters: filters, toasts: toasts, showToasts: st.toasts,
+      tools: [{ name: 'Improve', path: I.spark }, { name: 'Edit', path: I.edit }, { name: 'Save draft', path: I.draft }, { name: 'Skip', path: I.skip }],
+      countLabel: '8 new · 2 critical',
+      themeIcon: mode === 'dark' ? I.sun : I.moon, themeLabel: mode === 'dark' ? 'Light' : 'Dark',
+      toggleTheme: () => this.setState({ dark: mode !== 'dark' }),
+      undo: () => this.setState({ sending: 0 }),
+      replay: () => { this.setState({ toasts: false }); this.later(() => this.setState({ toasts: true }), 60); }
+    };
+  }
+}
+</script>
+</body>
+</html>

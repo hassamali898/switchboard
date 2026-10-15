@@ -1,0 +1,24 @@
+[project]
+name = "switchboard"
+version = "1.0.0b1"
+description = "Local watcher and queue for the Switchboard Claude Code plugin"
+requires-python = ">=3.10"
+dependencies = [
+  "slack_sdk>=3.27",
+  "aiohttp>=3.9",
+  "google-api-python-client>=2.120",
+  "google-auth>=2.28",
+  "google-auth-oauthlib>=1.2",
+  "google-cloud-pubsub>=2.20",
+  "keyring>=25",
+  "pyyaml>=6",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[tool.setuptools]
+packages = ["watcher", "watcher.adapters", "watcher.auth"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,0 +1,20 @@
+{
+  "dm": {"type": "message", "channel": "D111", "channel_type": "im", "user": "U_AHMED",
+         "text": "Can you review PR #482 before 5pm? It's the <https://github.com/a/b/pull/482|session store migration>.",
+         "ts": "1759480000.000100"},
+  "mention": {"type": "message", "channel": "C222", "channel_type": "channel", "user": "U_BILAL",
+              "text": "<@U_ME> deploy is blocked on your review", "ts": "1759480100.000200"},
+  "channel_noise": {"type": "message", "channel": "C222", "channel_type": "channel", "user": "U_BILAL",
+                    "text": "lunch anyone?", "ts": "1759480150.000300"},
+  "thread_reply": {"type": "message", "channel": "C222", "channel_type": "channel", "user": "U_BILAL",
+                   "text": "pushed a fix", "ts": "1759480300.000500", "thread_ts": "1759480200.000400",
+                   "parent_user_id": "U_SOMEONE"},
+  "own": {"type": "message", "channel": "C222", "channel_type": "channel", "user": "U_ME",
+          "text": "looking now", "ts": "1759480250.000450", "thread_ts": "1759480200.000400"},
+  "bot": {"type": "message", "channel": "D111", "channel_type": "im", "bot_id": "B1", "subtype": "bot_message",
+          "text": "Build passed", "ts": "1759480400.000600"},
+  "edited": {"type": "message", "subtype": "message_changed", "channel": "D111", "channel_type": "im",
+             "message": {"user": "U_AHMED", "text": "Can you review PR #482 before 6pm?", "ts": "1759480000.000100",
+                         "edited": {"user": "U_AHMED", "ts": "1759480500.000000"}},
+             "ts": "1759480500.000000"}
+}

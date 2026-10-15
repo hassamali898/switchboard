@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Meeting popup</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#C96442}a:hover{color:#D97757}
+@keyframes dialogIn{0%{opacity:0;transform:translateY(16px) scale(.95)}70%{opacity:1;transform:translateY(-2px) scale(1.01)}100%{opacity:1;transform:none}}
+@keyframes dim{from{opacity:0}to{opacity:1}}
+@keyframes osIn{0%{opacity:0;transform:translateX(60px)}100%{opacity:1;transform:none}}
+@keyframes shake{0%,100%{transform:rotate(0)}20%{transform:rotate(-14deg)}40%{transform:rotate(10deg)}60%{transform:rotate(-6deg)}80%{transform:rotate(4deg)}}
+.dialog{opacity:0;animation:dialogIn .5s cubic-bezier(.2,.9,.3,1.2) .4s forwards}
+.dim{opacity:0;animation:dim .4s ease-out .2s forwards}
+.os{opacity:0;animation:osIn .5s ease-out 1s forwards}
+.bell{display:inline-block;transform-origin:50% 10%;animation:shake 1.2s ease-in-out 1s infinite}
+.ib:hover{filter:brightness(0.96)}
+@media (prefers-reduced-motion: reduce){*{animation-duration:.01ms !important;animation-delay:0s !important;animation-iteration-count:1 !important}}
+</style>
+</helmet>
+<div style="width: 1440px; height: 900px; box-sizing: border-box; padding: 24px 28px; display: flex; flex-direction: column; gap: 14px; background: {{T.page}}; color: {{T.ink}}; font-family: 'Anthropic Sans', system-ui, -apple-system, 'Segoe UI', sans-serif">
+<div style="display: flex; align-items: center; gap: 12px">
+<span style="font-family: 'Anthropic Serif', Georgia, 'Times New Roman', serif; font-size: 24px; font-weight: 500">Meeting popup</span>
+<span style="font-size: 13px; color: {{T.faint}}">Critical · blocks the Claude window 5 min before</span>
+<span style="margin-left: auto; display: flex; gap: 8px">
+<button type="button" onClick="{{reset}}" class="ib" style="min-height: 36px; padding: 6px 12px; border-radius: 8px; border: 0.5px solid {{T.line2}}; background: {{T.win}}; color: {{T.ink}}; font: inherit; font-size: 13px; cursor: pointer">↻ Replay</button>
+<button type="button" onClick="{{toggleTheme}}" class="ib" style="min-height: 36px; display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; border: 0.5px solid {{T.line2}}; background: {{T.win}}; color: {{T.ink}}; font: inherit; font-size: 13px; cursor: pointer"><svg width="15" height="15" viewBox="0 0 24 24" style="fill: none; stroke: {{T.ink}}; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round"><path d="{{themeIcon}}"></path></svg>{{themeLabel}}</button>
+</span>
+</div>
+<div style="flex: 1; min-height: 0; position: relative; display: flex; flex-direction: column; border-radius: 14px; overflow: hidden; border: 0.5px solid {{T.line2}}; background: {{T.win}}; box-shadow: {{T.shadow}}">
+<div style="height: 42px; flex: none; display: flex; align-items: center; gap: 8px; padding: 0 16px; border-bottom: 0.5px solid {{T.line}}; background: {{T.side}}">
+<span style="width: 11px; height: 11px; border-radius: 50%; background: #FF5F57"></span><span style="width: 11px; height: 11px; border-radius: 50%; background: #FEBC2E"></span><span style="width: 11px; height: 11px; border-radius: 50%; background: #28C840"></span>
+<span style="margin: 0 auto; font-size: 12.5px; color: {{T.faint}}">Code · auth-refactor</span>
+</div>
+<div style="flex: 1; display: flex; flex-direction: column; align-items: center; padding: 32px; gap: 12px">
+<div style="width: 560px; display: flex; flex-direction: column; gap: 10px"><span style="align-self: flex-end; width: 60%; height: 40px; border-radius: 14px; background: {{T.hover}}"></span><span style="height: 10px; width: 90%; border-radius: 5px; background: {{T.skel}}"></span><span style="height: 10px; width: 76%; border-radius: 5px; background: {{T.skel}}"></span><span style="height: 120px; border-radius: 12px; background: {{T.skel}}"></span><span style="height: 10px; width: 70%; border-radius: 5px; background: {{T.skel}}"></span></div>
+</div>
+<sc-if value="{{open}}" hint-placeholder-val="{{true}}">
+<div class="dim" style="position: absolute; inset: 42px 0 0 0; background: {{T.dim}}; backdrop-filter: blur(5px); display: grid; place-items: center">
+<div class="dialog" role="dialog" aria-modal="true" aria-label="Meeting starting soon" style="width: 480px; box-sizing: border-box; padding: 28px; border-radius: 20px; background: {{T.card}}; border: 0.5px solid {{T.line2}}; box-shadow: {{T.pop}}; display: flex; flex-direction: column; align-items: center; gap: 18px; text-align: center">
+<div style="display: flex; align-items: center; gap: 8px; padding: 5px 12px 5px 6px; border-radius: 999px; background: {{CAL.bg}}"><span style="width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: {{T.card}}"><svg width="13" height="13" viewBox="0 0 24 24" style="fill: none; stroke: {{CAL.c}}; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round"><path d="{{I.cal}}"></path></svg></span><span style="font-size: 12.5px; font-weight: 600; color: {{CAL.c}}">Google Calendar</span><span class="bell" style="font-size: 14px">🔔</span></div>
+<div style="position: relative; width: 168px; height: 168px">
+<svg width="168" height="168" viewBox="0 0 168 168"><circle cx="84" cy="84" r="74" style="fill: none; stroke: {{T.line}}; stroke-width: 10"></circle><circle cx="84" cy="84" r="74" style="fill: none; stroke: {{T.clay}}; stroke-width: 10; stroke-linecap: round; stroke-dasharray: 465; stroke-dashoffset: {{dash}}; transform: rotate(-90deg); transform-origin: 84px 84px; transition: stroke-dashoffset 1s linear"></circle></svg>
+<div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px"><span style="font-family: 'Anthropic Serif', Georgia, serif; font-size: 40px">{{clock}}</span><span style="font-size: 12px; color: {{T.faint}}">to start</span></div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px"><span style="font-family: 'Anthropic Serif', Georgia, serif; font-size: 28px; font-weight: 500">Sprint planning</span>
+<span style="display: flex; justify-content: center; gap: 14px; font-size: 13px; color: {{T.muted}}"><span>🕓 4:00 to 4:30</span><span>📹 Google Meet</span></span></div>
+<div style="display: flex; align-items: center"><sc-for list="{{people}}" as="p" hint-placeholder-count="5"><span title="{{p.n}}" style="width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; margin-left: -8px; border: 2px solid {{T.card}}; background: {{p.c}}; color: #FFFFFF; font-size: 12px; font-weight: 600">{{p.i}}</span></sc-for><span style="margin-left: 8px; font-size: 13px; color: {{T.faint}}">+2</span></div>
+<sc-if value="{{snoozed}}" hint-placeholder-val="{{false}}"><span style="font-size: 13px; font-weight: 600; color: {{T.clay}}">{{snoozeText}}</span></sc-if>
+<button type="button" onClick="{{join}}" class="ib" style="width: 100%; min-height: 52px; display: flex; align-items: center; justify-content: center; gap: 8px; border-radius: 12px; border: none; background: {{T.btn}}; color: #FFFFFF; font: inherit; font-size: 16px; font-weight: 600; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" style="fill: none; stroke: #FFFFFF; stroke-width: 2; stroke-linejoin: round"><path d="{{I.video}}"></path></svg>Join now</button>
+<div style="width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+<button type="button" onClick="{{snooze1}}" class="ib" style="min-height: 42px; border-radius: 10px; border: 0.5px solid {{T.line2}}; background: transparent; color: {{T.ink}}; font: inherit; font-size: 13.5px; cursor: pointer">⏰ 1 min</button>
+<button type="button" onClick="{{snooze3}}" class="ib" style="min-height: 42px; border-radius: 10px; border: 0.5px solid {{T.line2}}; background: transparent; color: {{T.ink}}; font: inherit; font-size: 13.5px; cursor: pointer">⏰ 3 min</button>
+<button type="button" onClick="{{close}}" class="ib" style="min-height: 42px; border-radius: 10px; border: 0.5px solid {{T.line2}}; background: transparent; color: {{T.muted}}; font: inherit; font-size: 13.5px; cursor: pointer">Not going</button>
+</div>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{joined}}" hint-placeholder-val="{{false}}"><div style="position: absolute; inset: 0; display: grid; place-items: center"><div style="padding: 16px 22px; border-radius: 14px; background: {{T.card}}; border: 0.5px solid {{T.line2}}; box-shadow: {{T.pop}}; font-size: 15px; font-weight: 600; color: {{T.ok}}">✓ Opening Google Meet</div></div></sc-if>
+<sc-if value="{{open}}" hint-placeholder-val="{{true}}">
+<div class="os" style="position: absolute; top: 54px; right: 16px; width: 300px; box-sizing: border-box; padding: 12px 14px; border-radius: 14px; background: {{T.os}}; border: 0.5px solid {{T.line2}}; box-shadow: {{T.pop}}; display: flex; gap: 10px; align-items: center">
+<span style="width: 32px; height: 32px; border-radius: 8px; flex: none; display: grid; place-items: center; background: #D97757; color: #FFFFFF; font-size: 18px">✻</span>
+<span style="display: flex; flex-direction: column; gap: 1px"><span style="font-size: 11px; color: {{T.faint}}">Desktop notification · now</span><span style="font-size: 13px; font-weight: 600">Sprint planning in 5 min</span></span>
+</div>
+</sc-if>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"$preview":{"width":1440,"height":900}}'>
+const I = { cal: 'M4 5h16v15H4zM4 10h16M8 3v4M16 3v4', video: 'M3 7h12v10H3zM15 10l6-3v10l-6-3', sun: 'M12 16a4 4 0 1 0 0-8a4 4 0 0 0 0 8M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5', moon: 'M20 14A8 8 0 1 1 10 4a6 6 0 0 0 10 10z' };
+const TH = {
+  light: { page: '#FAF9F5', win: '#FFFFFF', side: '#F5F4ED', card: '#FFFFFF', ink: '#141413', muted: '#5E5D59', faint: '#87867F', line: 'rgba(31,30,29,0.10)', line2: 'rgba(31,30,29,0.22)', hover: 'rgba(115,114,108,0.10)', clay: '#C96442', btn: '#C96442', skel: '#EEECE3', dim: 'rgba(250,249,245,0.70)', os: 'rgba(245,244,237,0.96)', shadow: '0 1px 2px rgba(20,20,19,0.05), 0 10px 30px rgba(20,20,19,0.06)', pop: '0 24px 60px rgba(20,20,19,0.18)', ok: '#3F7A2E', cal: ['#9A5B00', 'rgba(249,171,0,0.16)'] },
+  dark: { page: '#1F1E1D', win: '#262624', side: '#1F1E1D', card: '#30302E', ink: '#FAF9F5', muted: '#C2C0B6', faint: '#9C9A92', line: 'rgba(222,220,209,0.10)', line2: 'rgba(222,220,209,0.22)', hover: 'rgba(222,220,209,0.07)', clay: '#E08A6B', btn: '#C96442', skel: '#3D3D3A', dim: 'rgba(20,20,19,0.66)', os: 'rgba(48,48,46,0.96)', shadow: '0 1px 2px rgba(0,0,0,0.3), 0 10px 30px rgba(0,0,0,0.3)', pop: '0 24px 60px rgba(0,0,0,0.55)', ok: '#9CCB86', cal: ['#FBC02D', 'rgba(249,171,0,0.14)'] }
+};
+class Component extends DCLogic {
+  state = { dark: null, secs: 299, open: true, joined: false, snoozed: false, snoozeText: '' };
+  tick = null;
+  componentDidMount() { this.start(); }
+  componentWillUnmount() { clearInterval(this.tick); }
+  start() { clearInterval(this.tick); this.tick = setInterval(() => this.setState({ secs: Math.max(0, this.state.secs - 1) }), 1000); }
+  isDark() { return this.state.dark === null ? (this.props.theme ?? 'light') === 'dark' : this.state.dark; }
+  renderVals() {
+    const st = this.state, md = this.isDark() ? 'dark' : 'light', T = TH[md];
+    const mm = Math.floor(st.secs / 60), ss = st.secs % 60;
+    return {
+      T: T, I: I, CAL: { c: T.cal[0], bg: T.cal[1] },
+      clock: mm + ':' + (ss < 10 ? '0' : '') + ss, dash: (465 * (1 - st.secs / 300)).toFixed(1),
+      people: [{ i: 'BA', n: 'Bilal Ahmed', c: '#788C5D' }, { i: 'AR', n: 'Ahmed Raza', c: '#6A9BCC' }, { i: 'SK', n: 'Sara Khan', c: '#C46686' }, { i: 'ZM', n: 'Zara Malik', c: '#D97757' }, { i: 'OF', n: 'Omar Farooq', c: '#5E5D59' }],
+      open: st.open, joined: st.joined, snoozed: st.snoozed, snoozeText: st.snoozeText,
+      join: () => { clearInterval(this.tick); this.setState({ open: false, joined: true }); },
+      close: () => { clearInterval(this.tick); this.setState({ open: false, joined: false }); },
+      snooze1: () => this.setState({ snoozed: true, snoozeText: 'Snoozed · back in 1 min' }),
+      snooze3: () => this.setState({ snoozed: true, snoozeText: 'Snoozed · back in 3 min' }),
+      reset: () => { this.setState({ secs: 299, open: false, joined: false, snoozed: false }); setTimeout(() => { this.setState({ open: true }); this.start(); }, 60); },
+      themeIcon: md === 'dark' ? I.sun : I.moon, themeLabel: md === 'dark' ? 'Light' : 'Dark',
+      toggleTheme: () => this.setState({ dark: md !== 'dark' })
+    };
+  }
+}
+</script>
+</body>
+</html>
